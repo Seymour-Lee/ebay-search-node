@@ -1,0 +1,22 @@
+{
+  "name": "csci571hw8",
+  "version": "1.0.0",
+  "description": "## Objectives",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usc-csci571/homework8-Seymour-Lee.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/usc-csci571/homework8-Seymour-Lee/issues"
+  },
+  "homepage": "https://github.com/usc-csci571/homework8-Seymour-Lee#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
