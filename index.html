@@ -1,14 +1,15 @@
 <!DOCTYPE html> 
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="index.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
     <script src="index.js"></script>
+    <link rel="stylesheet" type="text/css" href="index.css">
 
 </head>
 
 <body> 
-<div ng-app="app" ng-controller="ctrlmaster">
+<div class="container" ng-app="app" ng-controller="ctrlmaster">
     <!--
         search form, using AngularJS form
         1. form: http://www.runoob.com/angularjs/angularjs-forms.html
@@ -30,6 +31,105 @@
         3. event: use ng-click
         4. animation: http://www.runoob.com/angularjs/angularjs-animations.html
     -->
+
+    <!--
+        use bootstrap to layout UI
+    -->
+
+    <div class="row" id="row_form">
+        <div class="col"></div>
+        <div class="col-8">
+            <form action="/search" method="GET" id="search_form">
+                <div class="row"><div id="search_form_title">Product Search</div></div>
+                <div class="form-group row">
+                    <label for="keyword_input" class="col-sm-3 col-form-label">Keyword</label>
+                    <div class="col-sm-9">
+                        <input class="form-control" id="keyword_input" placeholder="Enter Product Name(eg. iPhone 8)">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="category_input" class="col-sm-3 col-form-label">Password</label>
+                    <div class="col-sm-4">
+                        <select class="form-control" id="category_input">
+                            <option>All Categories</option>
+                            <option>Art</option>
+                            <option>Baby</option>
+                            <option>Books</option>
+                            <option>Clothings, Shoes & Accessories</option>
+                            <option>Computers/Tablets & Networking</option>
+                            <option>Health & Beauty</option>
+                            <option>Music</option>
+                            <option>Video Games & Consoles</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="condition_input" class="col-sm-3 col-form-label">Condition</label>
+                    <div class="col-sm-5">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="condition_input_new" value="new">
+                            <label class="form-check-label" for="condition_input_new">New</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="condition_input_used" value="used">
+                            <label class="form-check-label" for="condition_input_used">Used</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="condition_input_unspecified" value="unspecified">
+                            <label class="form-check-label" for="condition_input_unspecified">Unspecified</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="shipping_options_input" class="col-sm-3 col-form-label">Shipping Options</label>
+                    <div class="col-sm-5">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="shipping_options_input_local" value="local">
+                            <label class="form-check-label" for="shipping_options_input_local">Local Pickup</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="shipping_options_input_free" value="free">
+                            <label class="form-check-label" for="shipping_options_input_free">Free Shipping</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="distance_input" class="col-sm-3 col-form-label">Distance (Miles)</label>
+                    <div class="col-sm-4">
+                        <input class="form-control" id="distance_input" placeholder="10">
+                    </div>
+                </div>
+                <fieldset class="form-group">
+                    <div class="row">
+                        <legend class="col-form-label col-sm-3 pt-0">From</legend>
+                        <div class="col-sm-9">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="" id="from_location" value="location" checked>
+                                <label class="form-check-label" for="from_location">Current Location</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="" id="from_zipcode" value="zipcode">
+                                <label class="form-check-label" for="from_zipcode">Other. Please specify zip code:</label>
+                            </div>
+                            <div>
+                                <input class="form-control" id="zipcode_input" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="reset" class="btn btn-primary">Clear</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col"></div>
+    </div>
+    
 
 </div>
 </body> 
