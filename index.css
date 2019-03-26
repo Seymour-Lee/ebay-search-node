@@ -11,3 +11,16 @@
     font-size: 32px;
     padding-bottom: 10px;
 }
+
+.nav-pills .nav-link {
+    color: #343a40;
+    background-color: #fff;
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    color: #fff;
+    background-color: #343a40;
+}
+
+
