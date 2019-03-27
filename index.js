@@ -17,6 +17,12 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
 
     $scope.url = location.host;
     $scope.items_list = [];
+    $scope.curpage_list = [];
+    $scope.page_range = [];
+    $scope.page_number = 0;
+    $scope.page_curnum = -1;
+    // for(var i = 1; i <= $scope.page_number; i++) $scope.page_range.push(i);
+
 
     
     $scope.search_keyword = function() {
@@ -44,13 +50,35 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
             // this callback will be called asynchronously
             // when the response is available
             $scope.items_list = response.data;
-            console.log($scope.items_list)
+            $scope.page_number = Math.ceil((response.data.length)/10);
+            $scope.page_curnum = 1;
+            for(var i = 1; i <= $scope.page_number; i++) $scope.page_range.push(i);
+            console.log($scope.items_list);
+            console.log($scope.page_number, $scope.page_curnum);
+            $scope.update_result_page(1);
+            // $(function () {
+            //     $('#result_table').bootstrapTable({
+            //         data: response.data
+            //     });
+            // });
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.
         });
 
     };
+
+    // input is new page number
+    $scope.update_result_page = function(page){
+        // unactive cur page number button
+        // update value of curpage_num;
+        // active cur page number button
+        $scope.page_curnum = page;
+        $scope.curpage_list = [];
+        for(var i = (page-1)*10; i <= page*10-1 && i < $scope.items_list.length; i++){
+            $scope.curpage_list.push($scope.items_list[i]);
+        }
+    }
 
     $scope.search_item = function(){
 
@@ -59,3 +87,10 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
 
 });
 
+// function image_formatter(value){
+//     return '<img src="' + value + '">';
+// }
+
+// function wishlist_formatter(value){
+//     return '<i class="mdi mdi-add-shopping-cart mdi-2x"></i>';
+// }

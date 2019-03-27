@@ -23,4 +23,23 @@
     background-color: #343a40;
 }
 
+.page-link {
+    color: black;
+    background-color: white;
+    border-color: white;
+}
 
+.page-link:hover {
+    color: black;
+    text-decoration: none;
+    background-color: white;
+    border-color: white;
+    box-shadow: 0 0 0 0.2rem rgba(0, 77, 243, 0.5);
+}
+
+.page-item.active .page-link {
+    z-index: 1;
+    color: #fff;
+    background-color: black;
+    border-color: black;
+}

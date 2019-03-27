@@ -148,12 +148,12 @@ function ebay_search_keyword(req, res){
                     col["index"] = (i+1).toString();
                     if(item.hasOwnProperty('galleryURL')) col["image"] = item.galleryURL[0];
                     else col["image"] = "";
-                    col["title"] = item.title;
-                    col["price"] = item.sellingStatus[0].currentPrice[0].__value__;
+                    col["title"] = item.title[0];
+                    col["price"] = '$'+item.sellingStatus[0].currentPrice[0].__value__;
                     if(item.hasOwnProperty('shippingInfo')) col["shipping"] = 'N/A';
                     else if(item.shippingInfo[0].shippingServiceCost[0].__value__ == '0') col["shipping"] = 'Free Shipping';
-                    else col["shipping"] = item.shippingInfo[0].shippingServiceCost[0].__value__;
-                    col["zip"] = item.postalCode;
+                    else col["shipping"] = '$'+item.shippingInfo[0].shippingServiceCost[0].__value__;
+                    col["zip"] = item.postalCode[0];
                     col["seller"] = item.sellerInfo[0].sellerUserName[0];
                     cols.push(col);
                 }
