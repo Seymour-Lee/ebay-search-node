@@ -26,6 +26,7 @@ var category2id = {
 };
 
 const ebay_keyword_url = 'http://svcs.ebay.com/services/search/FindingService/v1?'
+const ebay_item_url = 'http://open.api.ebay.com/shopping?'
 
 app.use(express.static(__dirname + '/node_modules'));
 
@@ -34,12 +35,7 @@ app.get('/index.css', (req, res) => res.sendfile('index.css'));
 app.get('/index.js', (req, res) => res.sendfile('index.js'));
 app.get('/searchProducts', (req, res) => res.sendfile('index.html'));
 app.get('/search_keyword', (req, res) => ebay_search_keyword(req, res));
-
-app.get('/search_item', function(req, res){
-    console.log(req.query);
-    // call ebay search item api
-    res.send(req.query)
-});
+app.get('/search_item', (req, res) => ebay_search_item(req, res));
 
 var server = app.listen(port, function(){
     console.log(`express.js app listening on port ${port}!`);
@@ -145,10 +141,20 @@ function ebay_search_keyword(req, res){
                 for(var i = 0; i < items.length; i++){
                     var col = {};
                     var item = items[i];
+                    col["id"] = item.itemId[0];
                     col["index"] = (i+1).toString();
                     if(item.hasOwnProperty('galleryURL')) col["image"] = item.galleryURL[0];
                     else col["image"] = "";
-                    col["title"] = item.title[0];
+                    if(item.title[0].length > 35){
+                        col["title"] = item.title[0].substring(0, 35);
+                        var pos = col["title"].length;
+                        while(col["title"][pos] != ' ') pos = pos-1;
+                        col["title"] = col["title"].substring(0, pos+1) + '...';
+                    }
+                    else{
+                        col["title"] = item.title[0];
+                    }
+                    col["tooltip"] = item.title[0];
                     col["price"] = '$'+item.sellingStatus[0].currentPrice[0].__value__;
                     if(item.hasOwnProperty('shippingInfo')) col["shipping"] = 'N/A';
                     else if(item.shippingInfo[0].shippingServiceCost[0].__value__ == '0') col["shipping"] = 'Free Shipping';
@@ -157,9 +163,77 @@ function ebay_search_keyword(req, res){
                     col["seller"] = item.sellerInfo[0].sellerUserName[0];
                     cols.push(col);
                 }
-                console.log(cols[49])
+                console.log(items.slice(-1))
+                console.log(cols.slice(-1))
                 // console.log(parsedData);
                 res.send(cols)
+            } catch (e) {
+                console.error(e.message);
+            }
+        });
+    }).on('error', (e) => {
+        console.error(`Got error: ${e.message}`);
+    });
+    // res.send(req.query)
+}
+
+function ebay_search_item(req, res){
+    // console.log(req.query);
+    // call ebay search item api
+    var param = req.query;
+    var url = ebay_item_url;
+
+    // http://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=[APP-ID]
+    //                                  &siteid=0&version=967&ItemID=132961484706
+    //                                  &IncludeSelector=Description,Details,ItemSpecifics
+    url += 'callname=GetSingleItem&responseencoding=JSON';
+    url += '&appid=' + ebay_key;
+    url += '&siteid=0&version=967&ItemID=' + param.id;
+    url += '&IncludeSelector=Description,Details,ItemSpecifics';
+
+    // console.log(url)
+
+    http.get(url, (resp) => {
+        const { statusCode } = resp;
+        const contentType = resp.headers['content-type'];
+        // console.log(contentType)
+
+        let error;
+        if (statusCode !== 200) {
+            error = new Error('Request Failed.\n' +
+                            `Status Code: ${statusCode}`);
+        }
+        // text/plain;charset=UTF-8
+        else if (!/^text\/plain/.test(contentType)) {
+            error = new Error('Invalid content-type.\n' +
+                            `Expected text/plain but received ${contentType}`);
+        }
+        if (error) {
+            console.error(error.message);
+            // Consume response data to free up memory
+            resp.resume();
+            return;
+        }
+
+        // resp.setEncoding('utf8');
+        let rawData = '';
+        resp.on('data', (chunk) => { rawData += chunk; });
+        resp.on('end', () => {
+            // console.log(rawData);
+            try {
+                const parsedData = JSON.parse(rawData);
+                // console.log(parsedData);
+                var item = parsedData.Item;
+                var ans = {};
+                ans["title"] = item.Title;
+                ans["images"] = item.PictureURL;
+                ans["subtitle"] = item.Subtitle;
+                ans["price"] = "$" + item.CurrentPrice.Value.toString();
+                ans["location"] = item.Location;
+                ans["returnpolicy"] = item.ReturnPolicy.ReturnsAccepted + " Within " + item.ReturnPolicy.ReturnsWithin;
+                ans["specifics"] = item.ItemSpecifics.NameValueList;
+                res.send(ans)
+                
             } catch (e) {
                 console.error(e.message);
             }
