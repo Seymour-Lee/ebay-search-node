@@ -10,6 +10,7 @@
     <script src="index.js"></script>
     <link rel="stylesheet" type="text/css" href="index.css">
     <link rel="stylesheet" type="text/css" href="bootstrap-material-design-icons/css/material-icons.css">
+    <link rel="shortcut icon" href="">
     <!-- <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css">
     <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script> -->
 </head>
@@ -253,7 +254,61 @@
             
         </div>
         <div class="row mt-4">
-            detail table
+            <div class="col-12">
+                <nav>
+                    <div class="nav nav-tabs d-flex justify-content-end" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active" id="nav-product-tab" data-toggle="tab" href="#nav-product" role="tab" aria-controls="nav-product" aria-selected="true">Product</a>
+                        <a class="nav-item nav-link" id="nav-photos-tab" data-toggle="tab" href="#nav-photos" role="tab" aria-controls="nav-photos" aria-selected="false">Photos</a>
+                        <a class="nav-item nav-link" id="nav-shipping-tab" data-toggle="tab" href="#nav-shipping" role="tab" aria-controls="nav-shipping" aria-selected="false">Shipping</a>
+                        <a class="nav-item nav-link" id="nav-seller-tab" data-toggle="tab" href="#nav-seller" role="tab" aria-controls="nav-seller" aria-selected="false">Seller</a>
+                        <a class="nav-item nav-link" id="nav-similar-tab" data-toggle="tab" href="#nav-similar" role="tab" aria-controls="nav-similar" aria-selected="false">Similar Products</a>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-product" role="tabpanel" aria-labelledby="nav-product-tab">
+                        <table id="result_table" class="table table-striped table-dark" data-pagination="true" data-page-size="10" data-id-field="index">
+                            <tbody>
+                                <tr>
+                                    <td>Product Images</td>
+                                    <td><a href="">View Product Images Here</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Subtitle</td>
+                                    <td>{{item_detail.subtitle}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Price</td>
+                                    <td>{{item_detail.price}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Location</td>
+                                    <td>{{item_detail.location}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Return Policy</td>
+                                    <td>{{item_detail.returnpolicy}}</td>
+                                </tr>
+                                <tr ng-repeat="obj in item_detail.specifics">
+                                    <td>{{obj.Name}}</td>
+                                    <td>{{obj.Value[0]}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="nav-photos" role="tabpanel" aria-labelledby="nav-photos-tab">
+                        Photos
+                    </div>
+                    <div class="tab-pane fade" id="nav-shipping" role="tabpanel" aria-labelledby="nav-shipping-tab">
+                        
+                    </div>
+                    <div class="tab-pane fade" id="nav-seller" role="tabpanel" aria-labelledby="nav-seller-tab">
+                        dddddddd
+                    </div>
+                    <div class="tab-pane fade" id="nav-similar" role="tabpanel" aria-labelledby="nav-similar-tab">
+                        eeeeeeeeeeeee
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>

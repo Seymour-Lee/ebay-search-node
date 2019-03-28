@@ -136,6 +136,7 @@ function ebay_search_keyword(req, res){
             try {
                 const parsedData = JSON.parse(rawData);
                 var items = parsedData.findItemsAdvancedResponse[0].searchResult[0].item;
+                // save a map for last searched items: id2obj
                 var cols = [];
                 // handle no records
                 for(var i = 0; i < items.length; i++){
@@ -225,14 +226,25 @@ function ebay_search_item(req, res){
                 // console.log(parsedData);
                 var item = parsedData.Item;
                 var ans = {};
-                ans["title"] = item.Title;
-                ans["images"] = item.PictureURL;
-                ans["subtitle"] = item.Subtitle;
-                ans["price"] = "$" + item.CurrentPrice.Value.toString();
-                ans["location"] = item.Location;
-                ans["returnpolicy"] = item.ReturnPolicy.ReturnsAccepted + " Within " + item.ReturnPolicy.ReturnsWithin;
-                ans["specifics"] = item.ItemSpecifics.NameValueList;
-                res.send(ans)
+                var product = {};
+                product["title"] = item.Title;
+                product["images"] = item.PictureURL;
+                product["subtitle"] = item.Subtitle;
+                product["price"] = "$" + item.CurrentPrice.Value.toString();
+                product["location"] = item.Location;
+                product["returnpolicy"] = item.ReturnPolicy.ReturnsAccepted + " Within " + item.ReturnPolicy.ReturnsWithin;
+                product["specifics"] = item.ItemSpecifics.NameValueList;
+
+                var photos = [];
+
+                var shipping = {};
+
+                var seller = {};
+
+                var similar = [];
+
+                res.send(item);
+                // console.log(item);
                 
             } catch (e) {
                 console.error(e.message);

@@ -91,8 +91,9 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         }).then(function successCallback(response) {
             // this callback will be called asynchronously
             // when the response is available
-            $scope.item_detail = response.data;
-            console.log($scope.item_detail);
+            console.log(response.data);
+            // $scope.item_detail = response.data;
+            // console.log($scope.item_detail);
             // display item details in a table
             
 
