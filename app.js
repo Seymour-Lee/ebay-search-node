@@ -11,7 +11,7 @@ const port = 8081
 
 const ebay_key = 'YimingLi-csci571h-PRD-2a6d0a603-ae320f66'
 const google_key = 'AIzaSyAe98ZgzyxL-Y_yDJwyUxLZNIAYiOLhCkE'
-const google_engine = '017216013711347458427:6m1-yskpuj8'
+const google_engine = '017216013711347458427:ibzu5g17jz8'
 const facebook_key = '316200389071168'
 
 var category2id = {
@@ -25,8 +25,12 @@ var category2id = {
     "video": "1249",
 };
 
+var last_keyword_result = {};
+
 const ebay_keyword_url = 'http://svcs.ebay.com/services/search/FindingService/v1?'
 const ebay_item_url = 'http://open.api.ebay.com/shopping?'
+const ebay_similar_url = 'http://svcs.ebay.com/MerchandisingService?'
+const google_photos_url = 'https://www.googleapis.com/customsearch/v1?'
 
 app.use(express.static(__dirname + '/node_modules'));
 
@@ -36,6 +40,8 @@ app.get('/index.js', (req, res) => res.sendfile('index.js'));
 app.get('/searchProducts', (req, res) => res.sendfile('index.html'));
 app.get('/search_keyword', (req, res) => ebay_search_keyword(req, res));
 app.get('/search_item', (req, res) => ebay_search_item(req, res));
+app.get('/search_similar', (req, res) => ebay_search_similar(req, res));
+app.get('/search_photos', (req, res) => google_search_photos(req, res));
 
 var server = app.listen(port, function(){
     console.log(`express.js app listening on port ${port}!`);
@@ -137,11 +143,13 @@ function ebay_search_keyword(req, res){
                 const parsedData = JSON.parse(rawData);
                 var items = parsedData.findItemsAdvancedResponse[0].searchResult[0].item;
                 // save a map for last searched items: id2obj
+                last_keyword_result = {};
                 var cols = [];
                 // handle no records
                 for(var i = 0; i < items.length; i++){
                     var col = {};
                     var item = items[i];
+                    last_keyword_result[item.itemId[0]] = item;
                     col["id"] = item.itemId[0];
                     col["index"] = (i+1).toString();
                     if(item.hasOwnProperty('galleryURL')) col["image"] = item.galleryURL[0];
@@ -164,8 +172,8 @@ function ebay_search_keyword(req, res){
                     col["seller"] = item.sellerInfo[0].sellerUserName[0];
                     cols.push(col);
                 }
-                console.log(items.slice(-1))
-                console.log(cols.slice(-1))
+                // console.log(items.slice(-1))
+                // console.log(cols.slice(-1))
                 // console.log(parsedData);
                 res.send(cols)
             } catch (e) {
@@ -234,17 +242,38 @@ function ebay_search_item(req, res){
                 product["location"] = item.Location;
                 product["returnpolicy"] = item.ReturnPolicy.ReturnsAccepted + " Within " + item.ReturnPolicy.ReturnsWithin;
                 product["specifics"] = item.ItemSpecifics.NameValueList;
+                ans["product"] = product;
 
-                var photos = [];
+                // // call google api
+                // var photos = [];
 
+                // last_keyword_result to get shipping info
+                var id = item.ItemID;
+                var shipping_info = last_keyword_result[id].shippingInfo[0]
                 var shipping = {};
+                shipping["cost"] = (shipping_info.shippingServiceCost[0].__value__ == '0.0'? 'Free Shipping': '$'+shipping_info.shippingServiceCost[0].__value__);
+                shipping["location"] = shipping_info.shipToLocations[0];
+                shipping["handle_time"] = shipping_info.handlingTime[0] + ' Day';
+                shipping["expedited"] = shipping_info.expeditedShipping[0];
+                shipping["oneday"] = shipping_info.oneDayShippingAvailable[0];
+                shipping["return"] = last_keyword_result[id].returnsAccepted[0];
+                ans["shipping"] = shipping;
 
                 var seller = {};
+                seller["feedback"] = item.Seller.FeedbackScore;
+                seller["popularity"] = item.Seller.PositiveFeedbackPercent;
+                seller["rating"] = item.Seller.FeedbackRatingStar;
+                seller["toprated"] = item.Seller.TopRatedSeller;
+                seller["store"] = item.Storefront.StoreName;
+                seller["at"] = item.Storefront.StoreURL;
+                ans["seller"] = seller;
 
-                var similar = [];
+                // // call ebay similar api
+                // var similar = ebay_search_similar(id);
+                // console.log(similar);
 
-                res.send(item);
-                // console.log(item);
+                res.send(ans);
+                // console.log(ans);
                 
             } catch (e) {
                 console.error(e.message);
@@ -256,15 +285,127 @@ function ebay_search_item(req, res){
     // res.send(req.query)
 }
 
+function ebay_search_similar(req, res){
+    var param = req.query;
+    var url = ebay_similar_url;
+    url += 'OPERATION-NAME=getSimilarItems&SERVICE-NAME=MerchandisingService&SERVICE-VERSION=1.1.0';
+    url += '&CONSUMER-ID=' + ebay_key;
+    url += '&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&itemId=' + param.id;
+    url += '&maxResults=20';
+
+    http.get(url, (resp) => {
+        const { statusCode } = resp;
+        const contentType = resp.headers['content-type'];
+        // console.log(contentType)
+
+        let error;
+        if (statusCode !== 200) {
+            error = new Error('Request Failed.\n' +
+                            `Status Code: ${statusCode}`);
+        }
+        // application/json;charset=utf-8
+        else if (!/^application\/json/.test(contentType)) {
+            error = new Error('Invalid content-type.\n' +
+                            `Expected text/plain but received ${contentType}`);
+        }
+        if (error) {
+            console.error(error.message);
+            // Consume response data to free up memory
+            resp.resume();
+            return;
+        }
+
+        // resp.setEncoding('utf8');
+        let rawData = '';
+        resp.on('data', (chunk) => { rawData += chunk; });
+        resp.on('end', () => {
+            // console.log(rawData);
+            try {
+                const parsedData = JSON.parse(rawData);
+                items = parsedData.getSimilarItemsResponse.itemRecommendations.item;
+                var ans = [];
+                for(var i = 0; i < items.length; i++){
+                    var item = items[i];
+                    var cur = {};
+                    cur["name"] = item.title;
+                    cur["url"] = item.viewItemURL;
+                    cur["price"] = "$"+item.buyItNowPrice.__value__;
+                    cur["shipping"] = "$"+item.shippingCost.__value__;
+                    cur["days"] = item.timeLeft.substring(item.timeLeft.indexOf("P")+1, item.timeLeft.indexOf("D"));
+                    ans.push(cur);
+                }
+                res.send(ans);
+                // console.log(similar_items)
+            } catch (e) {
+                console.error(e.message);
+            }
+        });
+    }).on('error', (e) => {
+        console.error(`Got error: ${e.message}`);
+    });
+}
+
+// https://www.googleapis.com/customsearch/v1?q=iphone&cx=017216013711347458427:6m1-yskpuj8
+//                                           &imgSize=huge&imgType=news&num=8&searchType=image
+//                                           &key=AIzaSyAe98ZgzyxL-Y_yDJwyUxLZNIAYiOLhCkE
+
+function google_search_photos(req, res){
+    var param = req.query;
+    var url = google_photos_url;
+    url += 'q=' + param.title;
+    url += '&cx=' + google_engine;
+    url += '&imgSize=huge&imgType=news&num=8&searchType=image';
+    url += '&key=' + google_key;
+
+    https.get(url, (resp) => {
+        const { statusCode } = resp;
+        const contentType = resp.headers['content-type'];
+        // console.log(contentType)
+
+        let error;
+        if (statusCode !== 200) {
+            error = new Error('Request Failed.\n' +
+                            `Status Code: ${statusCode}`);
+        }
+        // application/json;charset=utf-8
+        else if (!/^application\/json/.test(contentType)) {
+            error = new Error('Invalid content-type.\n' +
+                            `Expected text/plain but received ${contentType}`);
+        }
+        if (error) {
+            console.error(error.message);
+            // Consume response data to free up memory
+            resp.resume();
+            return;
+        }
+
+        // resp.setEncoding('utf8');
+        let rawData = '';
+        resp.on('data', (chunk) => { rawData += chunk; });
+        resp.on('end', () => {
+            // console.log(rawData);
+            try {
+                const parsedData = JSON.parse(rawData);
+                var items = parsedData.items;
+                var ans = [];
+                for(var i = 0; i < items.length; i++){
+                    ans.push(items[i].link);
+                }
+                res.send(ans);
+                // console.log(similar_items)
+            } catch (e) {
+                console.error(e.message);
+            }
+        });
+    }).on('error', (e) => {
+        console.error(`Got error: ${e.message}`);
+    });
+}
+
 function facebook_post(){
 
 }
 
-// https://www.googleapis.com/customsearch/v1?q=iphone&cx=017216013711347458427:6m1-yskpuj8&imgSize=huge&imgType=news&num=8&searchType=image&key=AIzaSyAe98ZgzyxL-Y_yDJwyUxLZNIAYiOLhCkE
 
-function google_image(){
- 
-
-}
 
 // var server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))

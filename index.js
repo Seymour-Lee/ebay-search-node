@@ -2,7 +2,7 @@ var app = angular.module('app', [])
 
 app.controller('ctrlmaster', function($scope, $location, $http) {
     $scope.init = function(){
-        console.log('in init')
+        // console.log('in init')
         $scope.form_keyword = 'iphone 6';
         $scope.form_category = 'all';
         $scope.form_condition_new = false;
@@ -53,8 +53,8 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
             $scope.page_number = Math.ceil((response.data.length)/10);
             $scope.page_curnum = 1;
             for(var i = 1; i <= $scope.page_number; i++) $scope.page_range.push(i);
-            console.log($scope.items_list);
-            console.log($scope.page_number, $scope.page_curnum);
+            // console.log($scope.items_list);
+            // console.log($scope.page_number, $scope.page_curnum);
             $scope.update_result_page(1);
             // $(function () {
             //     $('#result_table').bootstrapTable({
@@ -81,7 +81,7 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
     }
 
     $scope.show_item_detail = function(item_id){
-        console.log(item_id);
+        // console.log(item_id);
         $http({
             url: 'http://' + $scope.url + '/search_item',
             method: "GET",
@@ -105,6 +105,54 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
 
 
 
+
+
+        }, function errorCallback(response) {
+            // called asynchronously if an error occurs
+            // or server returns response with an error status.
+        });
+    }
+
+    $scope.search_similar = function(item_id){
+        // console.log('in search_similar');
+        $http({
+            url: 'http://' + $scope.url + '/search_similar',
+            method: "GET",
+            params:{
+                id: item_id,
+            }
+        }).then(function successCallback(response) {
+            // this callback will be called asynchronously
+            // when the response is available
+            console.log(response.data);
+            // $scope.item_detail = response.data;
+            // console.log($scope.item_detail);
+            // display item details in a table
+        
+
+
+        }, function errorCallback(response) {
+            // called asynchronously if an error occurs
+            // or server returns response with an error status.
+        });
+    }
+
+    $scope.search_photos = function(item_title){
+        // console.log('in search_photos, title is '+item_title);
+        $http({
+            url: 'http://' + $scope.url + '/search_photos',
+            method: "GET",
+            params:{
+                title: item_title,
+            }
+        }).then(function successCallback(response) {
+            // this callback will be called asynchronously
+            // when the response is available
+            console.log(response.data);
+            // $scope.item_detail = response.data;
+            // console.log($scope.item_detail);
+            // display item details in a table
+        
 
 
         }, function errorCallback(response) {
