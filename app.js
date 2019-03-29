@@ -262,9 +262,11 @@ function ebay_search_item(req, res){
                 var seller = {};
                 seller["feedback"] = item.Seller.FeedbackScore;
                 seller["popularity"] = item.Seller.PositiveFeedbackPercent;
-                seller["rating"] = item.Seller.FeedbackRatingStar;
+                // change rating to color
+                seller["rating"] = item.Seller.FeedbackRatingStar.toLowerCase();
                 seller["toprated"] = item.Seller.TopRatedSeller;
                 seller["store"] = item.Storefront.StoreName;
+                seller["title"] = item.Storefront.StoreName.replace(/ /g,'').toUpperCase();
                 seller["at"] = item.Storefront.StoreURL;
                 ans["seller"] = seller;
 

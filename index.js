@@ -1,9 +1,9 @@
-var app = angular.module('app', [])
+var app = angular.module('app', ['angular-svg-round-progressbar'])
 
 app.controller('ctrlmaster', function($scope, $location, $http) {
     $scope.init = function(){
         // console.log('in init')
-        $scope.form_keyword = 'iphone 6';
+        $scope.form_keyword = 'pixel';
         $scope.form_category = 'all';
         $scope.form_condition_new = false;
         $scope.form_condition_used = false;
@@ -23,7 +23,11 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
     $scope.page_curnum = -1;
     // for(var i = 1; i <= $scope.page_number; i++) $scope.page_range.push(i);
 
-    $scope.item_detail = undefined;
+    $scope.item_detail_product = undefined;
+    $scope.item_detail_photos = undefined;
+    $scope.item_detail_shipping = undefined;
+    $scope.item_detail_seller = undefined;
+    $scope.item_detail_similar = undefined;
     
     $scope.search_keyword = function() {
         // console.log(this.form_keyword, this.form_category)
@@ -92,21 +96,10 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
             // this callback will be called asynchronously
             // when the response is available
             console.log(response.data);
-            // $scope.item_detail = response.data;
-            // console.log($scope.item_detail);
-            // display item details in a table
-            
-
-
-
-
-
-
-
-
-
-
-
+            var data = response.data;
+            $scope.item_detail_product = data.product;
+            $scope.item_detail_shipping = data.shipping;
+            $scope.item_detail_seller = data.seller;
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.
@@ -122,15 +115,8 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
                 id: item_id,
             }
         }).then(function successCallback(response) {
-            // this callback will be called asynchronously
-            // when the response is available
             console.log(response.data);
-            // $scope.item_detail = response.data;
-            // console.log($scope.item_detail);
-            // display item details in a table
-        
-
-
+            $scope.item_detail_similar = response.data;
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.
@@ -146,15 +132,8 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
                 title: item_title,
             }
         }).then(function successCallback(response) {
-            // this callback will be called asynchronously
-            // when the response is available
             console.log(response.data);
-            // $scope.item_detail = response.data;
-            // console.log($scope.item_detail);
-            // display item details in a table
-        
-
-
+            $scope.item_detail_photos = response.data;
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.
