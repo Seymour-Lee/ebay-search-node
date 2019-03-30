@@ -27,7 +27,11 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
     $scope.item_detail_photos = undefined;
     $scope.item_detail_shipping = undefined;
     $scope.item_detail_seller = undefined;
-    $scope.item_detail_similar = undefined;
+    $scope.item_detail_similar_origin = undefined;
+    $scope.item_detail_similar_show = undefined;
+
+    $scope.order_refer = 'default';
+    $scope.order = 'ascending'
     
     $scope.search_keyword = function() {
         // console.log(this.form_keyword, this.form_category)
@@ -116,7 +120,8 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
             }
         }).then(function successCallback(response) {
             console.log(response.data);
-            $scope.item_detail_similar = response.data;
+            $scope.item_detail_similar_origin = response.data;
+            $scope.item_detail_similar_show = $scope.item_detail_similar_origin.slice(0, 5);
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.

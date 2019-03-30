@@ -34,7 +34,7 @@ const google_photos_url = 'https://www.googleapis.com/customsearch/v1?'
 
 app.use(express.static(__dirname + '/node_modules'));
 
-app.get('/', (req, res) => res.send(test()));
+app.get('/', (req, res) => res.sendfile('index.html'));
 app.get('/index.css', (req, res) => res.sendfile('index.css'));
 app.get('/index.js', (req, res) => res.sendfile('index.js'));
 app.get('/searchProducts', (req, res) => res.sendfile('index.html'));
@@ -47,9 +47,6 @@ var server = app.listen(port, function(){
     console.log(`express.js app listening on port ${port}!`);
 });
 
-function test(){
-    return 'hello world'
-}
 
 function ebay_search_keyword(req, res){
     // console.log(req.query);
@@ -330,12 +327,14 @@ function ebay_search_similar(req, res){
                     var item = items[i];
                     var cur = {};
                     cur["name"] = item.title;
+                    cur["image"] = item.imageURL;
                     cur["url"] = item.viewItemURL;
                     cur["price"] = "$"+item.buyItNowPrice.__value__;
                     cur["shipping"] = "$"+item.shippingCost.__value__;
                     cur["days"] = item.timeLeft.substring(item.timeLeft.indexOf("P")+1, item.timeLeft.indexOf("D"));
                     ans.push(cur);
                 }
+                // console.log(items.slice(-1));
                 res.send(ans);
                 // console.log(similar_items)
             } catch (e) {

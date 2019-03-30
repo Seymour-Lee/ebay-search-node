@@ -271,7 +271,7 @@
                             <tbody>
                                 <tr>
                                     <td>Product Images</td>
-                                    <td><a href="">View Product Images Here</a></td>
+                                    <td><a href="" data-toggle="modal" data-target="#product_images">View Product Images Here</a></td>
                                 </tr>
                                 <tr>
                                     <td>Subtitle</td>
@@ -295,6 +295,38 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div class="modal fade" id="product_images" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Product Images</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+                                            <div class="carousel-inner">
+                                                <div class="carousel-item" ng-class="{active:!$index}" ng-repeat="url in item_detail_photos">
+                                                    <img class="d-block w-100" ng-src="{{url}}">
+                                                </div>
+                                            </div>
+                                            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                <span class="sr-only">Previous</span>
+                                            </a>
+                                            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                <span class="sr-only">Next</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="tab-pane fade" id="nav-photos" role="tabpanel" aria-labelledby="nav-photos-tab">
                         <div class="row gallery">
@@ -381,7 +413,7 @@
                                 </tr>
                                 <tr>
                                     <td>Popularity</td>
-                                    <td><round-progress></round-progress> {{item_detail_seller.popularity}}</td>
+                                    <td>{{item_detail_seller.popularity}}</td>
                                 </tr>
                                 <tr>
                                     <td>Feedback Rating Star</td>
@@ -412,7 +444,36 @@
                         </table>
                     </div>
                     <div class="tab-pane fade" id="nav-similar" role="tabpanel" aria-labelledby="nav-similar-tab">
-                        eeeeeeeeeeeee
+                        <div class="row mt-3">
+                            <select class="form-control col-2" ng-model="order_refer">
+                                <option value="default">Default</option>
+                                <option value="name">Product Name</option>
+                                <option value="days">Days Left</option>
+                                <option value="price">Price</option>
+                                <option value="cost">Shipping Cost</option>
+                            </select>
+                            <select class="form-control col-2 ml-4" ng-model="order" ng-disabled="order_refer == 'default'">
+                                <option value="ascending">Ascending</option>
+                                <option value="descending">Descending</option>
+                            </select>
+                        </div>
+                        <div class="row mt-2 similar_item" ng-repeat="item in item_detail_similar_show">
+                                <div class="col-2">
+                                    <img ng-src="{{item.image}}">
+                                </div>
+                                <div class="col-10">
+                                    <a href="{{item.url}}" class="similar_item_a">{{item.name}}</a>
+                                    <div class="similar_item_price">Price: {{item.price}}</div>
+                                    <div class="similar_item_shipping">Shipping Cost: {{item.shipping}}</div>
+                                    <div class="similar_item_days">Day Left: {{item.days}}</div>
+                                </div>
+                        </div>
+                        <div class="row mt-4 d-flex justify-content-center">
+                            <button type="button" class="row btn btn-dark" >show more</button>
+                        </div>
+                        <div class="row mt-4 d-flex justify-content-center">
+                            <button type="button" class="row btn btn-dark">show less</button>
+                        </div>
                     </div>
                 </div>
             </div>

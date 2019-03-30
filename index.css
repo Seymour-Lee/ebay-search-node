@@ -74,3 +74,28 @@
     content: "\e5ca"; 
     color: green;
 }
+
+.similar_item{
+    background-color: #343a40;
+}
+
+.similar_item_a{
+    color: #219c9c
+}
+
+.similar_item_price{
+    color: #aeffb9;
+}
+
+.similar_item_shipping{
+    color: #ffc107;
+}
+
+.similar_item_days{
+    color: white;
+}
+
+/* .similar_item_image{
+    width: 90%;
+    height: 90%;
+} */
