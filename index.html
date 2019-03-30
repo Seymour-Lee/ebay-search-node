@@ -458,7 +458,7 @@
                             </select>
                         </div>
                         <div class="row mt-2 similar_item" ng-repeat="item in item_detail_similar_show">
-                                <div class="col-2">
+                                <div class="col-2 mt-2 mb-2">
                                     <img ng-src="{{item.image}}">
                                 </div>
                                 <div class="col-10">
@@ -469,10 +469,10 @@
                                 </div>
                         </div>
                         <div class="row mt-4 d-flex justify-content-center">
-                            <button type="button" class="row btn btn-dark" >show more</button>
+                            <button type="button" class="row btn btn-dark" ng-click="similar_show_more()" ng-show="(item_detail_similar_origin.length > 5) && (item_detail_similar_show.length == 5)">show more</button>
                         </div>
                         <div class="row mt-4 d-flex justify-content-center">
-                            <button type="button" class="row btn btn-dark">show less</button>
+                            <button type="button" class="row btn btn-dark" ng-click="similar_show_less()" ng-show="(item_detail_similar_origin.length > 5) && (item_detail_similar_origin.length == item_detail_similar_show.length)">show less</button>
                         </div>
                     </div>
                 </div>

@@ -15,7 +15,7 @@
 .img-fluid {
     border-style:solid;
     border-color: #343a40 #343a40 #343a40;
-    border-width: thick;
+    border-width: 10px;
 }
 
 .nav-pills .nav-link {
@@ -99,3 +99,9 @@
     width: 90%;
     height: 90%;
 } */
+
+.carousel-item{
+    border-style:solid;
+    border-color: #343a40 #343a40 #343a40;
+    border-width: 10px;
+}

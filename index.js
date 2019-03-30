@@ -121,11 +121,21 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         }).then(function successCallback(response) {
             console.log(response.data);
             $scope.item_detail_similar_origin = response.data;
-            $scope.item_detail_similar_show = $scope.item_detail_similar_origin.slice(0, 5);
+            $scope.item_detail_similar_show = ($scope.item_detail_similar_origin.length > 5? 
+                                               $scope.item_detail_similar_origin.slice(0, 5): 
+                                               $scope.item_detail_similar_origin);
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.
         });
+    }
+
+    $scope.similar_show_more = function(){
+        $scope.item_detail_similar_show = $scope.item_detail_similar_origin;
+    }
+
+    $scope.similar_show_less = function(){
+        $scope.item_detail_similar_show = $scope.item_detail_similar_origin.slice(0, 5);
     }
 
     $scope.search_photos = function(item_title){
