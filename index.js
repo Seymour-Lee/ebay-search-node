@@ -1,4 +1,4 @@
-var app = angular.module('app', ['angular-svg-round-progressbar'])
+var app = angular.module('app', ['ngAnimate', 'angular-svg-round-progressbar', 'ngMaterial'])
 
 app.controller('ctrlmaster', function($scope, $location, $http) {
     $scope.init = function(){
@@ -221,18 +221,20 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         });
     }
 
-    $scope.postalcodes = ["90007", "90002"];
-    $scope.postalcode = function(){
-        console.log($scope.form_zipcode);
-        $http({
+    $scope.postalcodes = [];
+    $scope.postalcode = function(val){
+        // console.log(val);
+        $scope.form_zipcode = val;
+        return $http({
             url: 'http://' + $scope.url + '/postalcode',
             method: "GET",
             params:{
-                code: $scope.form_zipcode,
+                code: val,
             }
         }).then(function successCallback(response) {
             $scope.postalcodes = response.data;
-            console.log($scope.postalcodes);
+            // console.log($scope.postalcodes);
+            return $scope.postalcodes;
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.

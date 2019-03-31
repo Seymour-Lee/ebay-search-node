@@ -6,11 +6,16 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-messages.min.js"></script>
     <script src="index.js"></script>
     <link rel="stylesheet" type="text/css" href="index.css">
     <link rel="stylesheet" type="text/css" href="bootstrap-material-design-icons/css/material-icons.css">
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.js"></script>
     <link rel="shortcut icon" href="">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-svg-round-progressbar/0.4.8/roundProgress.min.js"></script>
     <script async defer src="https://connect.facebook.net/en_US/sdk.js"></script>
@@ -112,11 +117,11 @@
                                 <label class="form-check-label" for="from_zipcode">Other. Please specify zip code:</label>
                             </div>
                             <div>
-                                <input class="form-control" ng-model="form_zipcode" id="zipcode_input" placeholder="" ng-change="postalcode()">
-                                <md-autocomplete md-selected-item="selectedItem" md-search-text="form_zipcode" md-items="item in postalcodes" md-item-text="item" md-min-length="0" placeholder="Type something">
-                                    <md-item-template> <span md-highlight-text="form_zipcode">{{item}}</span>
+                                <!-- <input class="form-control" ng-model="form_zipcode" id="zipcode_input" placeholder="" ng-change="postalcode()"> -->
+                                <md-autocomplete md-no-cache="true" md-selected-item="selected_item" md-search-text="search_text" md-items="item in postalcode(search_text)" md-item-text="item">
+                                    <md-item-template>
+                                        <span>{{item}}</span>
                                     </md-item-template>
-                                    <md-not-found>No matches found.</md-not-found>
                                 </md-autocomplete>
                             </div>
                         </div>
@@ -418,7 +423,7 @@
                             <tbody>
                                 <tr>
                                     <td>Shipping Cost</td>
-                                    <td>{{item_detail_shipping..cost}}</td>
+                                    <td>{{item_detail_shipping.cost}}</td>
                                 </tr>
                                 <tr>
                                     <td>Shipping Locations</td>
