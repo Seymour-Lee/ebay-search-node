@@ -10,10 +10,10 @@
     <script src="index.js"></script>
     <link rel="stylesheet" type="text/css" href="index.css">
     <link rel="stylesheet" type="text/css" href="bootstrap-material-design-icons/css/material-icons.css">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
     <link rel="shortcut icon" href="">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-svg-round-progressbar/0.4.8/roundProgress.min.js"></script>
-    <!-- <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css">
-    <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script> -->
+    <script async defer src="https://connect.facebook.net/en_US/sdk.js"></script>
 </head>
 
 <body> 
@@ -112,7 +112,12 @@
                                 <label class="form-check-label" for="from_zipcode">Other. Please specify zip code:</label>
                             </div>
                             <div>
-                                <input class="form-control" ng-model="form_zipcode" id="zipcode_input" placeholder="">
+                                <input class="form-control" ng-model="form_zipcode" id="zipcode_input" placeholder="" ng-change="postalcode()">
+                                <md-autocomplete md-selected-item="selectedItem" md-search-text="form_zipcode" md-items="item in postalcodes" md-item-text="item" md-min-length="0" placeholder="Type something">
+                                    <md-item-template> <span md-highlight-text="form_zipcode">{{item}}</span>
+                                    </md-item-template>
+                                    <md-not-found>No matches found.</md-not-found>
+                                </md-autocomplete>
                             </div>
                         </div>
                     </div>
@@ -221,7 +226,10 @@
                         <td>{{item.shipping}}</td>
                         <td>{{item.zip}}</td>
                         <td>{{item.seller}}</td>
-                        <td><button type="button" class="btn btn-light"><i class="mdi mdi-add-shopping-cart mdi-2x"></i></button></td>
+                        <td>
+                            <button type="button" class="btn btn-light" ng-click="add_wishlist(item.id)" ng-show="wishlist.hasOwnProperty(item.id) == false"><i class="mdi mdi-add-shopping-cart mdi-2x"></i></button>
+                            <button type="button" class="btn btn-light" ng-click="remove_wishlist(item.id)" ng-show="wishlist.hasOwnProperty(item.id) == true"><i class="mdi mdi-remove-shopping-cart mdi-2x"></i></button>
+                        </td>
                     </tr>
 
                 </tbody>
@@ -240,21 +248,64 @@
                 </ul>
             </nav>
         </div>
-        <div class="tab-pane fade" id="pills-wishlist" role="tabpanel" aria-labelledby="pills-wishlist-tab">
-            bbb
+        <div class="col-12 tab-pane fade" id="pills-wishlist" role="tabpanel" aria-labelledby="pills-wishlist-tab">
+            <table id="wishlist_table" class="table table-striped table-dark">
+                <thead>
+                    <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Shipping</th>
+                    <th scope="col">Seller</th>
+                    <th scope="col">Wish List</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="(id, item) in wishlist">
+                        <th scope="row">{{$index+1}}</th>
+                        <td><img ng-src='{{item.image}}'></td>
+                        <td><a title="{{item.tooltip}}" data-placement="bottom" data-toggle="tooltip" href="" ng-click="show_item_detail(item.id); search_similar(item.id); search_photos(item.title);">{{item.title}}</a></td>
+                        <td>{{item.price}}</td>
+                        <td>{{item.shipping}}</td>
+                        <td>{{item.seller}}</td>
+                        <td>
+                            <button type="button" class="btn btn-light" ng-click="add_wishlist(item.id)" ng-show="wishlist.hasOwnProperty(item.id) == false"><i class="mdi mdi-add-shopping-cart mdi-2x"></i></button>
+                            <button type="button" class="btn btn-light" ng-click="remove_wishlist(item.id)" ng-show="wishlist.hasOwnProperty(item.id) == true"><i class="mdi mdi-remove-shopping-cart mdi-2x"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5"></td>
+                        <td><b>Total Shopping</b></td>
+                        <td><b>${{wishlist_total_price}}</b></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <div id="item_detail">
         <div class="row mt-4">
             <div class="col-12 d-flex justify-content-center" id="item_detail_title">
-                {{item_detail.title}}
+                <b>{{item_detail_product.title}}</b>
             </div>
         </div>
         <div class="row mt-4 d-flex">
-            
+            <div class="ml-3 mr-auto p-2">
+                <button type="button" class="row btn btn-light"><i class="mdi mdi-chevron-left"></i>List</button>
+            </div>
+            <div class="p-2">
+                <a href="https://www.facebook.com/dialog/share?app_id=316200389071168&display=popup&href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2F&redirect_uri=https%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fexplorer" onclick="return false;">
+                    <img src="http://csci571.com/hw/hw8/Images/facebook.png" ng-click="facebook_share()" height="35" width="35" alt="">
+                </a>
+            </div>
+            <div class="p-2 mr-3">
+                <button type="button" class="row btn btn-light" ng-click="add_wishlist(item_detail_product.id)" ng-show="wishlist.hasOwnProperty(item_detail_product.id) == false"><i class="mdi mdi-add-shopping-cart"></i></button>
+                <button type="button" class="row btn btn-light" ng-click="remove_wishlist(item_detail_product.id)" ng-show="wishlist.hasOwnProperty(item_detail_product.id) == true"><i class="mdi mdi-remove-shopping-cart"></i></button>
+                <!-- <button type="button" class="row btn btn-light"><i class="mdi mdi-add-shopping-cart mdi-lg"></i></button> -->
+            </div>
         </div>
-        <div class="row mt-4">
+        <div class="row">
             <div class="col-12">
                 <nav>
                     <div class="nav nav-tabs d-flex justify-content-end" id="nav-tab" role="tablist">
@@ -445,14 +496,14 @@
                     </div>
                     <div class="tab-pane fade" id="nav-similar" role="tabpanel" aria-labelledby="nav-similar-tab">
                         <div class="row mt-3">
-                            <select class="form-control col-2" ng-model="order_refer">
+                            <select class="form-control col-2" ng-model="order_refer" ng-change="sort_similar()">
                                 <option value="default">Default</option>
                                 <option value="name">Product Name</option>
                                 <option value="days">Days Left</option>
                                 <option value="price">Price</option>
                                 <option value="cost">Shipping Cost</option>
                             </select>
-                            <select class="form-control col-2 ml-4" ng-model="order" ng-disabled="order_refer == 'default'">
+                            <select class="form-control col-2 ml-4" ng-model="order" ng-change="sort_similar()" ng-disabled="order_refer == 'default'">
                                 <option value="ascending">Ascending</option>
                                 <option value="descending">Descending</option>
                             </select>

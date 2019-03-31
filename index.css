@@ -75,6 +75,11 @@
     color: green;
 }
 
+.mdi-remove-shopping-cart:before {
+    content: "\e928"; 
+    color: orange;
+}
+
 .similar_item{
     background-color: #343a40;
 }

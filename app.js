@@ -13,6 +13,7 @@ const ebay_key = 'YimingLi-csci571h-PRD-2a6d0a603-ae320f66'
 const google_key = 'AIzaSyAe98ZgzyxL-Y_yDJwyUxLZNIAYiOLhCkE'
 const google_engine = '017216013711347458427:ibzu5g17jz8'
 const facebook_key = '316200389071168'
+const geoname_username = 'liyiming'
 
 var category2id = {
     "art": "550",
@@ -31,6 +32,7 @@ const ebay_keyword_url = 'http://svcs.ebay.com/services/search/FindingService/v1
 const ebay_item_url = 'http://open.api.ebay.com/shopping?'
 const ebay_similar_url = 'http://svcs.ebay.com/MerchandisingService?'
 const google_photos_url = 'https://www.googleapis.com/customsearch/v1?'
+const geoname_postalcode_url = 'http://api.geonames.org/postalCodeSearchJSON?'
 
 app.use(express.static(__dirname + '/node_modules'));
 
@@ -42,6 +44,8 @@ app.get('/search_keyword', (req, res) => ebay_search_keyword(req, res));
 app.get('/search_item', (req, res) => ebay_search_item(req, res));
 app.get('/search_similar', (req, res) => ebay_search_similar(req, res));
 app.get('/search_photos', (req, res) => google_search_photos(req, res));
+app.get('/postalcode', (req, res) => geoname_postalcode(req, res));
+
 
 var server = app.listen(port, function(){
     console.log(`express.js app listening on port ${port}!`);
@@ -233,12 +237,14 @@ function ebay_search_item(req, res){
                 var ans = {};
                 var product = {};
                 product["title"] = item.Title;
+                product["id"] = item.ItemID;
                 product["images"] = item.PictureURL;
                 product["subtitle"] = item.Subtitle;
                 product["price"] = "$" + item.CurrentPrice.Value.toString();
                 product["location"] = item.Location;
                 product["returnpolicy"] = item.ReturnPolicy.ReturnsAccepted + " Within " + item.ReturnPolicy.ReturnsWithin;
                 product["specifics"] = item.ItemSpecifics.NameValueList;
+                product["natureserchurl"] = item.ViewItemURLForNaturalSearch;
                 ans["product"] = product;
 
                 // // call google api
@@ -391,6 +397,59 @@ function google_search_photos(req, res){
                 var ans = [];
                 for(var i = 0; i < items.length; i++){
                     ans.push(items[i].link);
+                }
+                res.send(ans);
+                // console.log(similar_items)
+            } catch (e) {
+                console.error(e.message);
+            }
+        });
+    }).on('error', (e) => {
+        console.error(`Got error: ${e.message}`);
+    });
+}
+
+// http://api.geonames.org/postalCodeSearchJSON?postalcode_startsWith=900&username=liyiming&country=US&maxRows=5
+function geoname_postalcode(req, res){
+    //postalcode_startsWith=900&username=[Usern ame]&country=US&maxRows=5
+    var param = req.query;
+    var url = geoname_postalcode_url;
+    url += 'postalcode_startsWith=' + param.code;
+    url += '&username=' + geoname_username;
+    url += '&country=US&maxRows=5';
+
+    http.get(url, (resp) => {
+        const { statusCode } = resp;
+        const contentType = resp.headers['content-type'];
+        // console.log(contentType)
+
+        let error;
+        if (statusCode !== 200) {
+            error = new Error('Request Failed.\n' +
+                            `Status Code: ${statusCode}`);
+        }
+        // application/json;charset=utf-8
+        else if (!/^application\/json/.test(contentType)) {
+            error = new Error('Invalid content-type.\n' +
+                            `Expected text/plain but received ${contentType}`);
+        }
+        if (error) {
+            console.error(error.message);
+            // Consume response data to free up memory
+            resp.resume();
+            return;
+        }
+
+        // resp.setEncoding('utf8');
+        let rawData = '';
+        resp.on('data', (chunk) => { rawData += chunk; });
+        resp.on('end', () => {
+            // console.log(rawData);
+            try {
+                const parsedData = JSON.parse(rawData);
+                var ans = [];
+                for(var i = 0; i < parsedData.postalCodes.length; i++){
+                    ans.push(parsedData.postalCodes[i].postalCode);
                 }
                 res.send(ans);
                 // console.log(similar_items)

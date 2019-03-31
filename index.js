@@ -17,6 +17,7 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
 
     $scope.url = location.host;
     $scope.items_list = [];
+    $scope.items_id2obj = {};
     $scope.curpage_list = [];
     $scope.page_range = [];
     $scope.page_number = 0;
@@ -58,6 +59,10 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
             // this callback will be called asynchronously
             // when the response is available
             $scope.items_list = response.data;
+            $scope.items_id2obj = {};
+            for(var i = 0; i < $scope.items_list.length; i++){
+                $scope.items_id2obj[$scope.items_list[i].id] = $scope.items_list[i];
+            }
             $scope.page_number = Math.ceil((response.data.length)/10);
             $scope.page_curnum = 1;
             for(var i = 1; i <= $scope.page_number; i++) $scope.page_range.push(i);
@@ -121,21 +126,82 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         }).then(function successCallback(response) {
             console.log(response.data);
             $scope.item_detail_similar_origin = response.data;
-            $scope.item_detail_similar_show = ($scope.item_detail_similar_origin.length > 5? 
+            $scope.item_detail_similar_show = JSON.parse(JSON.stringify(($scope.item_detail_similar_origin.length > 5? 
                                                $scope.item_detail_similar_origin.slice(0, 5): 
-                                               $scope.item_detail_similar_origin);
+                                               $scope.item_detail_similar_origin)));
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.
         });
     }
 
+    // $scope.propertyName = '';
+    // $scope.reverse = false;
+    // $scope.sortBy = function(propertyName) {
+    //     console.log(propertyName);
+    //     $scope.reverse = ($scope.propertyName === propertyName) ? !$scope.reverse : false;
+    //     $scope.propertyName = propertyName;
+    // };
+
+    $scope.cmp_name_asc = function(a, b){
+        return a.name > b.name;
+    }
+    $scope.cmp_name_des = function(a, b){
+        return a.name < b.name;
+    }
+
+    $scope.cmp_days_asc = function(a, b){
+        return parseInt(a.days) > parseInt(b.days); 
+    }
+    $scope.cmp_days_des = function(a, b){
+        return parseInt(a.days) < parseInt(b.days); 
+    }
+
+    $scope.cmp_price_asc = function(a, b){
+        return parseFloat(a.price.slice(1)) > parseFloat(b.price.slice(1)); 
+    }
+    $scope.cmp_price_des = function(a, b){
+        return parseFloat(a.price.slice(1)) < parseFloat(b.price.slice(1)); 
+    }
+
+    $scope.cmp_cost_asc = function(a, b){
+        return parseFloat(a.shipping.slice(1)) > parseFloat(b.shipping.slice(1)); 
+    }
+    $scope.cmp_cost_des = function(a, b){
+        return parseFloat(a.shipping.slice(1)) < parseFloat(b.shipping.slice(1));
+    }
+
+
+    $scope.sort_similar = function(){
+        console.log($scope.order_refer, $scope.order);
+        // 
+        if($scope.order_refer == 'default'){
+            $scope.item_detail_similar_show = JSON.parse(JSON.stringify($scope.item_detail_similar_origin.slice(0, $scope.item_detail_similar_show.length)));
+        }
+        else{
+            if($scope.order == 'ascending'){
+                if($scope.order_refer == 'name') $scope.item_detail_similar_show.sort($scope.cmp_name_asc);
+                if($scope.order_refer == 'days') $scope.item_detail_similar_show.sort($scope.cmp_days_asc);
+                if($scope.order_refer == 'price') $scope.item_detail_similar_show.sort($scope.cmp_price_asc);
+                if($scope.order_refer == 'cost') $scope.item_detail_similar_show.sort($scope.cmp_cost_asc);
+            }
+            else{
+                if($scope.order_refer == 'name') $scope.item_detail_similar_show.sort($scope.cmp_name_des);
+                if($scope.order_refer == 'days') $scope.item_detail_similar_show.sort($scope.cmp_days_des);
+                if($scope.order_refer == 'price') $scope.item_detail_similar_show.sort($scope.cmp_price_des);
+                if($scope.order_refer == 'cost') $scope.item_detail_similar_show.sort($scope.cmp_cost_des);
+            }
+        }
+    }
+
     $scope.similar_show_more = function(){
-        $scope.item_detail_similar_show = $scope.item_detail_similar_origin;
+        $scope.item_detail_similar_show = JSON.parse(JSON.stringify($scope.item_detail_similar_origin));
+        $scope.sort_similar();
     }
 
     $scope.similar_show_less = function(){
-        $scope.item_detail_similar_show = $scope.item_detail_similar_origin.slice(0, 5);
+        $scope.item_detail_similar_show = JSON.parse(JSON.stringify($scope.item_detail_similar_origin.slice(0, 5)));
+        $scope.sort_similar();
     }
 
     $scope.search_photos = function(item_title){
@@ -153,6 +219,70 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.
         });
+    }
+
+    $scope.postalcodes = ["90007", "90002"];
+    $scope.postalcode = function(){
+        console.log($scope.form_zipcode);
+        $http({
+            url: 'http://' + $scope.url + '/postalcode',
+            method: "GET",
+            params:{
+                code: $scope.form_zipcode,
+            }
+        }).then(function successCallback(response) {
+            $scope.postalcodes = response.data;
+            console.log($scope.postalcodes);
+        }, function errorCallback(response) {
+            // called asynchronously if an error occurs
+            // or server returns response with an error status.
+        });
+    }
+
+    $scope.facebook_share = function(){
+        console.log('facebook share');
+        FB.ui({
+            method: 'share',
+            display: 'popup',
+            quote: 'Buy ' + $scope.item_detail_product.title + ' at ' + $scope.item_detail_product.price + ' from link blow',
+            href: $scope.item_detail_product.natureserchurl,
+        }, function(response){});
+    };
+
+    if (localStorage.getItem("csci551_wishlist") === null) {
+        localStorage.setItem("csci551_wishlist", "{}");
+    }
+    $scope.wishlist = JSON.parse(localStorage.getItem("csci551_wishlist"));
+    $scope.cal_wishlist_price = function(){
+        $scope.wishlist_total_price = 0.0;
+        for(var key in $scope.wishlist){
+            var price = $scope.wishlist[key].price.slice(1);
+            $scope.wishlist_total_price += parseFloat(price)
+        }
+    }
+    $scope.wishlist_total_price = 0.0;
+    $scope.cal_wishlist_price();
+    // console.log($scope.wishlist)
+    // console.log($scope.wishlist_total_price)
+    
+    $scope.add_wishlist = function(item_id){
+        // console.log('add wish list', item_id)
+        $scope.wishlist[item_id] = $scope.items_id2obj[item_id];
+        // console.log($scope.wishlist)
+        $scope.cal_wishlist_price();
+        $scope.write_localstorage();
+    }
+
+    $scope.remove_wishlist = function(item_id){
+        // console.log('remove wish list', item_id)
+        delete $scope.wishlist[item_id];
+        // console.log($scope.wishlist);
+        $scope.cal_wishlist_price();
+        $scope.write_localstorage();
+    }
+
+    $scope.write_localstorage = function(){
+        localStorage.setItem("csci551_wishlist", JSON.stringify($scope.wishlist));
     }
 
     $scope.row_clicked = function(){
@@ -193,3 +323,12 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
 // })();
 
 $("[data-toggle='tooltip']").tooltip();
+
+window.fbAsyncInit = function(){
+    FB.init({
+        appId: '316200389071168',
+        autoLogAppEvents: true,
+        xfbml: true,
+        version: 'v3.2',
+    });
+};
