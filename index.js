@@ -261,6 +261,7 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
             var price = $scope.wishlist[key].price.slice(1);
             $scope.wishlist_total_price += parseFloat(price)
         }
+        $scope.wishlist_total_price = $scope.wishlist_total_price.toFixed(2);
     }
     $scope.wishlist_total_price = 0.0;
     $scope.cal_wishlist_price();
@@ -287,42 +288,20 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         localStorage.setItem("csci551_wishlist", JSON.stringify($scope.wishlist));
     }
 
+    $scope.show_detail = false;
+    $scope.direction = "right";
+    $scope.switch_slide = function(){
+        console.log('in switch_slide()', $scope.show_detail)
+        $scope.show_detail = !$scope.show_detail;
+        $scope.direction = ($scope.direction == 'right'? 'left': 'right')
+    }
+
     $scope.row_clicked = function(){
         console.log('row clicked')
     }
 
-    $scope.search_item = function(){
-
-    };
-
-
 });
 
-// function image_formatter(value){
-//     return '<img src="' + value + '">';
-// }
-
-// function wishlist_formatter(value){
-//     return '<i class="mdi mdi-add-shopping-cart mdi-2x"></i>';
-// }
-
-// (function() {
-//     'use strict';
-//     window.addEventListener('load', function() {
-//         // Fetch all the forms we want to apply custom Bootstrap validation styles to
-//         var forms = document.getElementsByClassName('needs-validation');
-//         // Loop over them and prevent submission
-//         var validation = Array.prototype.filter.call(forms, function(form) {
-//             form.addEventListener('submit', function(event) {
-//             if (form.checkValidity() === false) {
-//                 event.preventDefault();
-//                 event.stopPropagation();
-//             }
-//             form.classList.add('was-validated');
-//             }, false);
-//         });
-//     }, false);
-// })();
 
 $("[data-toggle='tooltip']").tooltip();
 

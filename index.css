@@ -110,3 +110,29 @@
     border-color: #343a40 #343a40 #343a40;
     border-width: 10px;
 }
+
+.slide_right{
+    transition: all linear 0.3s;
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.slide_right.ng-hide {
+    /* position: relative; */
+    left: 200%;
+    background-color: transparent;
+}
+
+.slide_left{
+    transition: all linear 0.3s;
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.slide_left.ng-hide {
+    /* position: relative; */
+    left: -100%;
+    background-color: transparent;
+}
