@@ -1,2 +1,5 @@
 node_modules/
 images/
+*.json
+README.md
+setup.sh

@@ -143,6 +143,10 @@ function ebay_search_keyword(req, res){
             try {
                 const parsedData = JSON.parse(rawData);
                 var items = parsedData.findItemsAdvancedResponse[0].searchResult[0].item;
+                if(items == undefined || items.length == 0){
+                    res.send([]);
+                    return;
+                }
                 // save a map for last searched items: id2obj
                 last_keyword_result = {};
                 var cols = [];
@@ -166,11 +170,13 @@ function ebay_search_keyword(req, res){
                     }
                     col["tooltip"] = item.title[0];
                     col["price"] = '$'+item.sellingStatus[0].currentPrice[0].__value__;
-                    if(item.hasOwnProperty('shippingInfo')) col["shipping"] = 'N/A';
-                    else if(item.shippingInfo[0].shippingServiceCost[0].__value__ == '0') col["shipping"] = 'Free Shipping';
+                    if(item.hasOwnProperty('shippingInfo') == false) col["shipping"] = 'N/A';
+                    else if(item.shippingInfo[0].shippingServiceCost[0].__value__ == '0.0') col["shipping"] = 'Free Shipping';
                     else col["shipping"] = '$'+item.shippingInfo[0].shippingServiceCost[0].__value__;
-                    col["zip"] = item.postalCode[0];
-                    col["seller"] = item.sellerInfo[0].sellerUserName[0];
+                    if(item.hasOwnProperty("postalCode")) col["zip"] = item.postalCode[0];
+                    else col["zip"] = 'N/A';
+                    if(item.hasOwnProperty('sellerInfo')) col["seller"] = item.sellerInfo[0].sellerUserName[0];
+                    else col["seller"] = 'N/A';
                     cols.push(col);
                 }
                 // console.log(items.slice(-1))
@@ -239,6 +245,7 @@ function ebay_search_item(req, res){
                 product["title"] = item.Title;
                 product["id"] = item.ItemID;
                 product["images"] = item.PictureURL;
+                console.log(product["images"])
                 product["subtitle"] = item.Subtitle;
                 product["price"] = "$" + item.CurrentPrice.Value.toString();
                 product["location"] = item.Location;
@@ -268,9 +275,12 @@ function ebay_search_item(req, res){
                 // change rating to color
                 seller["rating"] = item.Seller.FeedbackRatingStar.toLowerCase();
                 seller["toprated"] = item.Seller.TopRatedSeller;
-                seller["store"] = item.Storefront.StoreName;
-                seller["title"] = item.Storefront.StoreName.replace(/ /g,'').toUpperCase();
-                seller["at"] = item.Storefront.StoreURL;
+                if(item.hasOwnProperty('Storefront.StoreName')) seller["store"] = item.Storefront.StoreName;
+                else seller["store"] = 'N/A';
+                if(item.hasOwnProperty('Storefront.StoreName')) seller["title"] = item.Storefront.StoreName.replace(/ /g,'').toUpperCase();
+                else seller["title"] = 'N/A';
+                if(item.hasOwnProperty('Storefront.StoreURL')) seller["at"] = item.Storefront.StoreURL;
+                else seller["at"] = 'N/A';
                 ans["seller"] = seller;
 
                 // // call ebay similar api

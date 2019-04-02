@@ -1,6 +1,6 @@
-var app = angular.module('app', ['ngAnimate', 'angular-svg-round-progressbar', 'ngMaterial'])
+var app = angular.module('app', ['ngAnimate', 'angular-svg-round-progressbar', 'ngMaterial', 'tooltips'])
 
-app.controller('ctrlmaster', function($scope, $location, $http) {
+app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
     $scope.init = function(){
         // console.log('in init')
         $scope.form_keyword = 'pixel';
@@ -12,8 +12,14 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         $scope.form_shipping_free = false;
         $scope.form_distance = '1000';
         $scope.form_from = 'location';
-        $scope.form_zipcode = '90007';
+        $scope.form_local_zipcode = '90007';
+        $scope.form_zipcode = '';
+        $scope.get_local_ip();
     }
+
+    $scope.status_code = {
+        
+    };
 
     $scope.url = location.host;
     $scope.items_list = [];
@@ -33,6 +39,23 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
 
     $scope.order_refer = 'default';
     $scope.order = 'ascending'
+
+    $scope.last_detail_item = "-1";
+    $scope.set_selected = function(item_id){
+        $scope.last_detail_item = item_id;
+    }
+
+    $scope.get_local_ip = function(){
+        $http({
+            url: 'http://ip-api.com/json',
+            method: "GET",
+        }).then(function successCallback(response) {
+            $scope.form_local_zipcode = response.data.zip;
+            // console.log($scope.form_local_zipcode);
+        }, function errorCallback(response) {
+            $scope.form_local_zipcode = '90007'
+        });
+    }
     
     $scope.search_keyword = function() {
         // console.log(this.form_keyword, this.form_category)
@@ -40,6 +63,22 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         // console.log($scope.form_shipping_local, $scope.form_shipping_free, $scope.form_distance)
         // console.log($scope.form_from, $scope.form_zipcode)
         // ajax to express.js
+        $scope.result_div_godown();
+        $scope.norecord_div_godown();
+        $scope.search_bar_showup();
+        $scope.items_list = [];
+        $scope.items_id2obj = {};
+        $scope.curpage_list = [];
+        $scope.page_range = [];
+        $scope.page_number = 0;
+        $scope.page_curnum = -1;
+
+        $scope.show_detail = false;
+        $scope.show_result = true;
+        $scope.show_bar = false;
+
+        $scope.last_detail_item = "-1";
+        // console.log($scope.form_from == 'location'? $scope.form_local_zipcode: $scope.form_zipcode)
         $http({
             url: 'http://' + $scope.url + '/search_keyword',
             method: "GET",
@@ -53,7 +92,7 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
                 free: $scope.form_shipping_free,
                 distance: $scope.form_distance,
                 from: $scope.form_from,
-                zipcode: $scope.form_zipcode
+                zipcode: ($scope.form_from == 'location'? $scope.form_local_zipcode: $scope.form_zipcode)
             }
         }).then(function successCallback(response) {
             // this callback will be called asynchronously
@@ -69,6 +108,7 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
             // console.log($scope.items_list);
             // console.log($scope.page_number, $scope.page_curnum);
             $scope.update_result_page(1);
+            $scope.search_bar_godown();
             // $(function () {
             //     $('#result_table').bootstrapTable({
             //         data: response.data
@@ -77,9 +117,42 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.
+            $scope.search_bar_godown();
+            
         });
 
     };
+
+    $scope.show_search_bar = false;
+    $scope.search_bar_showup = function(){
+        $scope.show_search_bar = true;
+    }
+    $scope.search_bar_godown = function(){
+        $timeout( function(){
+            // console.log("Aloha World!");
+            $scope.show_search_bar = false;
+            // show that div
+            if($scope.items_list.length == 0) $scope.norecord_div_showup();
+            else $scope.result_div_showup();
+        }, 500);
+    }
+
+    $scope.show_result_div = false;
+    $scope.result_div_showup = function(){
+        $scope.show_result_div = true;
+    }
+    $scope.result_div_godown = function(){
+        $scope.show_result_div = false;
+    }
+
+    $scope.show_norecord_div = false;
+    $scope.norecord_div_showup = function(){
+        $scope.show_norecord_div = true;
+    }
+    $scope.norecord_div_godown = function(){
+        $scope.show_norecord_div = false;
+    }
+
 
     // input is new page number
     $scope.update_result_page = function(page){
@@ -215,6 +288,7 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         }).then(function successCallback(response) {
             console.log(response.data);
             $scope.item_detail_photos = response.data;
+            console.log($scope.item_detail_photos);
         }, function errorCallback(response) {
             // called asynchronously if an error occurs
             // or server returns response with an error status.
@@ -267,13 +341,21 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
     $scope.cal_wishlist_price();
     // console.log($scope.wishlist)
     // console.log($scope.wishlist_total_price)
-    
+    $scope.op_wishlist = function(item_id){
+        if($scope.wishlist.hasOwnProperty(item_id)){
+            $scope.remove_wishlist(item_id);
+        }
+        else{
+            $scope.add_wishlist(item_id);
+        }
+    }
     $scope.add_wishlist = function(item_id){
         // console.log('add wish list', item_id)
         $scope.wishlist[item_id] = $scope.items_id2obj[item_id];
         // console.log($scope.wishlist)
         $scope.cal_wishlist_price();
         $scope.write_localstorage();
+        
     }
 
     $scope.remove_wishlist = function(item_id){
@@ -282,6 +364,10 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
         // console.log($scope.wishlist);
         $scope.cal_wishlist_price();
         $scope.write_localstorage();
+        // $scope.delay = false;
+        // $timeout(function(){
+        //     $scope.delay = true;
+        // }, 250);
     }
 
     $scope.write_localstorage = function(){
@@ -289,11 +375,46 @@ app.controller('ctrlmaster', function($scope, $location, $http) {
     }
 
     $scope.show_detail = false;
+    $scope.show_result = true;
+    $scope.show_bar = false;
+    $scope.result_move_right = function(){
+        $scope.show_result = false;
+        $scope.show_bar = true;
+    }
+
+    $scope.detail_showup = function(){
+        // set timeout
+        // 0.5 seconds delay
+        $timeout( function(){
+            // console.log("Hello World!");
+            $scope.show_bar = false;
+            $scope.show_detail = true;
+        }, 500);
+        
+    }
+
+    $scope.detail_move_right = function(){
+        $scope.show_detail = false;
+        $scope.show_bar = true;
+    }
+
+    $scope.result_showup = function(){
+        // set timeout
+        // 0.5 seconds delay
+        $timeout( function(){
+            // console.log("Aloha World!");
+            $scope.show_bar = false;
+            $scope.show_result = true;
+        }, 500);
+        
+    }
+
+
     $scope.direction = "right";
     $scope.switch_slide = function(){
         console.log('in switch_slide()', $scope.show_detail)
         $scope.show_detail = !$scope.show_detail;
-        $scope.direction = ($scope.direction == 'right'? 'left': 'right')
+        // $scope.direction = ($scope.direction == 'right'? 'left': 'right')
     }
 
     $scope.row_clicked = function(){

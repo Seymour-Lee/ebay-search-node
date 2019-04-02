@@ -1,3 +1,16 @@
+/* @media only screen and (max-width: 600px) {
+    .paddd{
+        width: 100% !important;
+    }
+} */
+
+@media (min-width: 600px) and (max-width: 10000px) {
+    .paddd{
+        width: 66% !important;
+    }
+
+}
+
 #row_form{
     background-color: #313133;
     color: white;
@@ -72,7 +85,7 @@
 
 .mdi-check:before {
     content: "\e5ca"; 
-    color: green;
+    color: #008000;
 }
 
 .mdi-remove-shopping-cart:before {
@@ -135,4 +148,64 @@
     /* position: relative; */
     left: -100%;
     background-color: transparent;
+}
+
+.moveRight.ng-leave{
+    transition: all linear 0.5s;
+    position: relative;
+    left: 0;
+}
+
+.moveRight.ng-leave.ng-leave-active{
+    left: 100%;
+}
+
+.bar_move_right.ng-enter{
+    transition: all linear 0.5s;
+    position: relative;
+    left: -100%;
+}
+
+.bar_move_right.ng-enter.ng-enter-active{
+    left: 0;
+}
+
+.selected {
+    /* background-color: #6c757d !important; */
+    background-color: #e6e6e6 !important;
+  }
+
+.angular-tooltip{
+    background-color: #4d4d4d;
+    color: #b3b3b3;
+    border: 0;
+    text-align: center;
+    font-style: normal !important;
+}
+
+.angular-tooltip{
+    background-color: #4d4d4d;
+    color: #b3b3b3;
+    border: 0;
+    text-align: center;
+}
+.row_img{
+    width: 100px;
+    height: 100px;
+}
+
+
+#round_bar0{
+    position: absolute;;
+    display: inline;
+    top: 0;
+    left: 0;
+}
+
+#round_bar1{
+    position: absolute;;
+    display: inline;
+    top: 7px;
+    left: 5px;
+    z-index: 1;
 }
