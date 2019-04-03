@@ -10,38 +10,54 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
         $scope.form_condition_unspecified = false;
         $scope.form_shipping_local = false;
         $scope.form_shipping_free = false;
-        $scope.form_distance = undefined;
+        $scope.form_distance = '10';
         $scope.form_from = 'location';
         $scope.form_local_zipcode = '90007';
         $scope.form_zipcode = undefined;
         $scope.get_local_ip();
+        $scope.url = location.host;
+        // console.log('$scope.url is ', $scope.url)
+        $scope.items_list = undefined;
+        $scope.items_id2obj = {};
+        $scope.curpage_list = [];
+        $scope.page_range = [];
+        $scope.page_number = 0;
+        $scope.page_curnum = -1;
+        // for(var i = 1; i <= $scope.page_number; i++) $scope.page_range.push(i);
+
+        $scope.item_detail_product = undefined;
+        $scope.item_detail_photos = undefined;
+        $scope.item_detail_shipping = undefined;
+        $scope.item_detail_seller = undefined;
+        $scope.item_detail_similar_origin = undefined;
+        $scope.item_detail_similar_show = undefined;
+
+        
+
+        $scope.last_detail_item = "-1";
+
+        $scope.show_search_bar = false;
+        $scope.show_result_div = false;
+        $scope.show_norecord_div = false;
+        $scope.postalcodes = [];
+        $scope.wishlist = JSON.parse(localStorage.getItem("csci551_wishlist"));
+        $scope.wishlist_total_price = 0.0;
+        $scope.cal_wishlist_price();
+
+        $scope.show_detail = false;
+        $scope.show_result = true;
+        $scope.show_bar = false;
+
+        $scope.direction = "right";
     }
 
     $scope.status_code = {
         
     };
 
-    $scope.url = location.host;
-    // console.log('$scope.url is ', $scope.url)
-    $scope.items_list = [];
-    $scope.items_id2obj = {};
-    $scope.curpage_list = [];
-    $scope.page_range = [];
-    $scope.page_number = 0;
-    $scope.page_curnum = -1;
-    // for(var i = 1; i <= $scope.page_number; i++) $scope.page_range.push(i);
-
-    $scope.item_detail_product = undefined;
-    $scope.item_detail_photos = undefined;
-    $scope.item_detail_shipping = undefined;
-    $scope.item_detail_seller = undefined;
-    $scope.item_detail_similar_origin = undefined;
-    $scope.item_detail_similar_show = undefined;
-
     $scope.order_refer = 'default';
-    $scope.order = 'ascending'
+    $scope.order = 'ascending';
 
-    $scope.last_detail_item = "-1";
     $scope.set_selected = function(item_id){
         $scope.last_detail_item = item_id;
 
@@ -125,7 +141,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
 
     };
 
-    $scope.show_search_bar = false;
+    
     $scope.search_bar_showup = function(){
         $scope.show_search_bar = true;
     }
@@ -139,7 +155,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
         }, 500);
     }
 
-    $scope.show_result_div = false;
+    
     $scope.result_div_showup = function(){
         $scope.show_result_div = true;
     }
@@ -147,7 +163,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
         $scope.show_result_div = false;
     }
 
-    $scope.show_norecord_div = false;
+    
     $scope.norecord_div_showup = function(){
         $scope.show_norecord_div = true;
     }
@@ -246,11 +262,16 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
         return parseFloat(a.shipping.slice(1)) < parseFloat(b.shipping.slice(1));
     }
 
-
+    
     $scope.sort_similar = function(){
+        // $timeout( function(){
+        //     console.log($scope.order_refer, $scope.order, '11');
+        // }, 500);
+        $scope.order_refer = $('#aaa').val();
+        $scope.order = $('#bbb').val();
         console.log($scope.order_refer, $scope.order);
         // 
-        if($scope.order_refer == 'default'){
+        if($scope.order_refer === 'default'){
             $scope.item_detail_similar_show = JSON.parse(JSON.stringify($scope.item_detail_similar_origin.slice(0, $scope.item_detail_similar_show.length)));
         }
         else{
@@ -267,6 +288,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
                 if($scope.order_refer == 'cost') $scope.item_detail_similar_show.sort($scope.cmp_cost_des);
             }
         }
+        
     }
 
     $scope.similar_show_more = function(){
@@ -297,15 +319,17 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
         });
     }
 
-    $scope.postalcodes = [];
+    $scope.right_zipcode = false;
     $scope.postal_input_change = function(val){
-        form_zipcode = val;
-        if(val === '' || val === undefined){
-            $("input[name='zipcode_input_name']").addClass('form-control is-invalid')
-        }
-        else{
-            $("input[name='zipcode_input_name']").removeClass('form-control is-invalid')
-        }
+        $scope.form_zipcode = val;
+        var re = new RegExp("^[0-9]{5}$");
+        $scope.right_zipcode = re.test($scope.form_zipcode);
+        // if(val === '' || val === undefined){
+        //     $("input[name='zipcode_input_name']").addClass('form-control is-invalid')
+        // }
+        // else{
+        //     $("input[name='zipcode_input_name']").removeClass('form-control is-invalid')
+        // }
     }
     $scope.postalcode = function(val){
         // console.log(val);
@@ -339,7 +363,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
     if (localStorage.getItem("csci551_wishlist") === null) {
         localStorage.setItem("csci551_wishlist", "{}");
     }
-    $scope.wishlist = JSON.parse(localStorage.getItem("csci551_wishlist"));
+    
     $scope.cal_wishlist_price = function(){
         $scope.wishlist_total_price = 0.0;
         for(var key in $scope.wishlist){
@@ -348,8 +372,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
         }
         $scope.wishlist_total_price = $scope.wishlist_total_price.toFixed(2);
     }
-    $scope.wishlist_total_price = 0.0;
-    $scope.cal_wishlist_price();
+    
     // console.log($scope.wishlist)
     // console.log($scope.wishlist_total_price)
     $scope.op_wishlist = function(item_id){
@@ -385,9 +408,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
         localStorage.setItem("csci551_wishlist", JSON.stringify($scope.wishlist));
     }
 
-    $scope.show_detail = false;
-    $scope.show_result = true;
-    $scope.show_bar = false;
+    
     $scope.result_move_right = function(){
         $scope.show_result = false;
         $scope.show_bar = true;
@@ -421,7 +442,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
     }
 
 
-    $scope.direction = "right";
+    
     $scope.switch_slide = function(){
         console.log('in switch_slide()', $scope.show_detail)
         $scope.show_detail = !$scope.show_detail;

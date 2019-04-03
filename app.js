@@ -276,11 +276,12 @@ function ebay_search_item(req, res){
                 seller["rating"] = item.Seller.FeedbackRatingStar.toLowerCase();
                 console.log(item.Seller.FeedbackRatingStar,item.Seller.FeedbackScore)
                 seller["toprated"] = item.Seller.TopRatedSeller;
-                if(item.hasOwnProperty('Storefront.StoreName')) seller["store"] = item.Storefront.StoreName;
-                else seller["store"] = 'N/A';
-                if(item.hasOwnProperty('Storefront.StoreName')) seller["title"] = item.Storefront.StoreName.replace(/ /g,'').toUpperCase();
+                if(item.hasOwnProperty('Storefront')) seller["title"] = item.Storefront.StoreName.replace(/ /g,'').toUpperCase();
                 else seller["title"] = 'N/A';
-                if(item.hasOwnProperty('Storefront.StoreURL')) seller["at"] = item.Storefront.StoreURL;
+                if(item.hasOwnProperty('Storefront')) seller["store"] = item.Storefront.StoreName;
+                else seller["store"] = 'N/A';
+                
+                if(item.hasOwnProperty('Storefront')) seller["at"] = item.Storefront.StoreURL;
                 else seller["at"] = 'N/A';
                 ans["seller"] = seller;
 

@@ -133,7 +133,7 @@
                                         <div ng-message-exp="{true}">This field is required</div>
                                       </div> -->
                                 </md-autocomplete>
-                                <div class="help-block" ng-show="(form_zipcode === undefined || form_zipcode === '') && search_keyword_form.zipcode_input_name.$touched">
+                                <div class="help-block" ng-show="form_from == 'zipcode' && (form_zipcode === undefined || form_zipcode === '') && search_keyword_form.zipcode_input_name.$touched">
                                     Please enter a zipcode.
                                 </div>
                             </div>
@@ -142,7 +142,7 @@
                 </fieldset>
                 <div class="form-group row">
                     <div class="col-sm-2">
-                        <button type="submit" class="btn btn-light"><i class="mdi mdi-search"></i>Search</button>
+                        <button type="submit" ng-disabled="!((form_keyword.length > 0) && (form_distance.length > 0) && (form_from == 'location' || (form_zipcode.length > 0 && right_zipcode)))" class="btn btn-light"><i class="mdi mdi-search"></i>Search</button>
                     </div>
                     <div class="col-sm-2">
                         <button type="button" ng-click="init()" class="btn btn-light"><i class="mdi mdi-clear-all"></i>Clear</button>
@@ -165,6 +165,10 @@
                 </li>
             </ul>
         </div>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button type="button" class="row btn btn-light" ng-click="result_move_right(); detail_showup();" ng-disabled = "last_detail_item === '-1'">Detail<i class="mdi mdi-chevron-right"></i></button>
     </div>
 
     <!--
@@ -210,9 +214,7 @@
         </div>
         <div class="row mt-4 tab-content moveRight" id="pills-tabContent" ng-if="show_result">
             <div class="col-12 tab-pane fade show active" id="pills-results" role="tabpanel" aria-labelledby="pills-results-tab">
-                <div class="d-flex justify-content-end">
-                    <button type="button" class="row btn btn-light" ng-click="result_move_right(); detail_showup();" ng-class="{disabled: last_detail_item == '-1'}">Detail<i class="mdi mdi-chevron-right"></i></button>
-                </div>
+                
                 <table id="result_table" class="table table-striped table-dark mt-3" data-pagination="true" data-page-size="10" data-id-field="index">
                     <thead>
                         <tr>
@@ -269,13 +271,13 @@
                 <nav aria-label="..." class="d-flex justify-content-center">
                     <ul class="pagination">
                         <li class="page-item" ng-class="{disabled: page_curnum == 1}">
-                            <button class="page-link" ng-click="update_result_page(page_curnum-1)">Previous</button>
+                            <button class="page-link" ng-click="update_result_page(page_curnum-1)">&laquo; Previous</button>
                         </li>
                         <li class="page-item" ng-class="{active: page_curnum == i}" ng-repeat="i in page_range">
                             <button class="page-link" ng-click="update_result_page(i)">{{i}}</button>
                         </li>
                         <li class="page-item" ng-class="{disabled: page_curnum == page_number}">
-                            <button class="page-link" ng-click="update_result_page(page_curnum+1)">Next</button>
+                            <button class="page-link" ng-click="update_result_page(page_curnum+1)">Next &raquo;</button>
                         </li>
                     </ul>
                 </nav>
@@ -363,7 +365,7 @@
                                         <td>Product Images</td>
                                         <td><a href="" data-toggle="modal" data-target="#product_images">View Product Images Here</a></td>
                                     </tr>
-                                    <tr>
+                                    <tr ng-if="item_detail_product.subtitle.length > 0">
                                         <td>Subtitle</td>
                                         <td>{{item_detail_product.subtitle}}</td>
                                     </tr>
@@ -398,7 +400,7 @@
                                             <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
                                                 <div class="carousel-inner">
                                                     <div class="carousel-item" ng-class="{active:!$index}" ng-repeat="url in item_detail_product.images">
-                                                        <img class="d-block w-100" ng-src="{{url}}">
+                                                        <a href="{{url}}"><img class="d-block w-100" ng-src="{{url}}"></a>
                                                     </div>
                                                 </div>
                                                 <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
@@ -422,32 +424,39 @@
                             <div class="row gallery">
                                 <div class="col-4">
                                     <div class="mt-3">
-                                        <img class="img-fluid" ng-src="{{item_detail_photos[0]}}" alt="Card image cap">
+                                        <a href="{{item_detail_photos[0]}}"><img class="img-fluid" ng-src="{{item_detail_photos[0]}}" alt="Card image cap"></a>
                                     </div>
                                     <div class="mt-3">
-                                        <img class="img-fluid" ng-src="{{item_detail_photos[3]}}" alt="Card image cap">
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="mt-3">
-                                        <img class="img-fluid" ng-src="{{item_detail_photos[1]}}" alt="Card image cap">
-                                    </div>
-                                    <div class="mt-3">
-                                        <img class="img-fluid" ng-src="{{item_detail_photos[4]}}" alt="Card image cap">
-                                    </div>
-                                    <div class="mt-3">
-                                        <img class="img-fluid" ng-src="{{item_detail_photos[6]}}" alt="Card image cap">
+                                        <a href="{{item_detail_photos[3]}}"><img class="img-fluid" ng-src="{{item_detail_photos[3]}}" alt="Card image cap"></a>
+                                        <!-- <img class="img-fluid" ng-src="{{item_detail_photos[3]}}" alt="Card image cap"> -->
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="mt-3">
-                                        <img class="img-fluid" ng-src="{{item_detail_photos[2]}}" alt="Card image cap">
+                                        <a href="{{item_detail_photos[1]}}"><img class="img-fluid" ng-src="{{item_detail_photos[1]}}" alt="Card image cap"></a>
+                                        <!-- <img class="img-fluid" ng-src="{{item_detail_photos[1]}}" alt="Card image cap"> -->
                                     </div>
                                     <div class="mt-3">
-                                        <img class="img-fluid" ng-src="{{item_detail_photos[5]}}" alt="Card image cap">
+                                        <a href="{{item_detail_photos[4]}}"><img class="img-fluid" ng-src="{{item_detail_photos[4]}}" alt="Card image cap"></a>
+                                        <!-- <img class="img-fluid" ng-src="{{item_detail_photos[4]}}" alt="Card image cap"> -->
                                     </div>
                                     <div class="mt-3">
-                                        <img class="img-fluid" ng-src="{{item_detail_photos[7]}}" alt="Card image cap">
+                                        <a href="{{item_detail_photos[6]}}"><img class="img-fluid" ng-src="{{item_detail_photos[6]}}" alt="Card image cap"></a>
+                                        <!-- <img class="img-fluid" ng-src="{{item_detail_photos[6]}}" alt="Card image cap"> -->
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="mt-3">
+                                        <a href="{{item_detail_photos[2]}}"><img class="img-fluid" ng-src="{{item_detail_photos[2]}}" alt="Card image cap"></a>
+                                        <!-- <img class="img-fluid" ng-src="{{item_detail_photos[2]}}" alt="Card image cap"> -->
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="{{item_detail_photos[5]}}"><img class="img-fluid" ng-src="{{item_detail_photos[5]}}" alt="Card image cap"></a>
+                                        <!-- <img class="img-fluid" ng-src="{{item_detail_photos[5]}}" alt="Card image cap"> -->
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="{{item_detail_photos[7]}}"><img class="img-fluid" ng-src="{{item_detail_photos[7]}}" alt="Card image cap"></a>
+                                        <!-- <img class="img-fluid" ng-src="{{item_detail_photos[7]}}" alt="Card image cap"> -->
                                     </div>
                                 </div>
                             </div>
@@ -514,10 +523,10 @@
                                     <tr>
                                         <td>Feedback Rating Star</td>
                                         <td ng-if="item_detail_seller.feedback < 10000">
-                                            <i class="mdi mdi-stars mdi-2x" style="color:{{item_detail_seller.rating}}"></i>
+                                            <i class="mdi mdi-star-border mdi-2x" style="color:{{item_detail_seller.rating}}"></i>
                                         </td>
                                         <td ng-if="item_detail_seller.feedback >= 10000">
-                                            <i class="mdi mdi-star-border mdi-2x" style="color:{{item_detail_seller.rating.substring(item_detail_seller.rating.indexOf('Shooting'))}}"></i>
+                                            <i class="mdi mdi-stars mdi-2x" style="color:{{item_detail_seller.rating.substring(item_detail_seller.rating.indexOf('Shooting'))}}"></i>
                                         </td>
                                     </tr>
                                     <tr>
@@ -544,14 +553,14 @@
                         </div>
                         <div class="tab-pane fade" id="nav-similar" role="tabpanel" aria-labelledby="nav-similar-tab">
                             <div class="row mt-3">
-                                <select class="form-control col-2" ng-model="order_refer" ng-change="sort_similar()">
+                                <select id="aaa" class="form-control col-2" ng-model="order_refer" ng-change="sort_similar()">
                                     <option value="default">Default</option>
                                     <option value="name">Product Name</option>
                                     <option value="days">Days Left</option>
                                     <option value="price">Price</option>
                                     <option value="cost">Shipping Cost</option>
                                 </select>
-                                <select class="form-control col-2 ml-4" ng-model="order" ng-change="sort_similar()" ng-disabled="order_refer == 'default'">
+                                <select id="bbb" class="form-control col-2 ml-4" ng-model="order" ng-change="sort_similar()" ng-disabled="order_refer == 'default'">
                                     <option value="ascending">Ascending</option>
                                     <option value="descending">Descending</option>
                                 </select>
