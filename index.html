@@ -46,7 +46,7 @@
                 <div class="form-group row">
                     <label for="keyword_input" class="col-sm-3 col-form-label">Keyword<span style="color: red">*</span></label>
                     <div class="col-sm-9">
-                        <input class="form-control" name="keyword_input_name" ng-class="{'is-invalid': form_keyword === undefined}" ng-change="row_clicked()" ng-model="form_keyword" id="keyword_input" placeholder="Enter Product Name(eg. iPhone 8)" required>
+                        <input class="form-control" name="keyword_input_name" ng-class="{'is-invalid': form_keyword === undefined && search_keyword_form.keyword_input_name.$touched}" ng-model="form_keyword" id="keyword_input" placeholder="Enter Product Name(eg. iPhone 8)" required>
                         <!-- <p ng-show="search_keyword_form.keyword_input_name.$invalid" class="help-block">You name is required.</p> -->
                         <div class="invalid-feedback">
                             Please enter a keyword.
@@ -102,7 +102,10 @@
                 <div class="form-group row">
                     <label for="distance_input" class="col-sm-3 col-form-label">Distance (Miles)</label>
                     <div class="col-sm-4">
-                        <input class="form-control" ng-model="form_distance" id="distance_input" placeholder="10">
+                        <input class="form-control" name="distance_input_name" ng-class="{'is-invalid': form_distance === undefined && search_keyword_form.distance_input_name.$touched}" ng-model="form_distance" id="distance_input" placeholder="10" required>
+                        <div class="invalid-feedback">
+                            Please enter a distance.
+                        </div>
                     </div>
                 </div>
                 <fieldset class="form-group">
@@ -119,11 +122,20 @@
                             </div>
                             <div>
                                 <!-- <input class="form-control" ng-model="form_zipcode" id="zipcode_input" placeholder="" ng-change="postalcode()"> -->
-                                <md-autocomplete md-no-cache="true" md-selected-item="selected_item" md-search-text="search_text" md-items="item in postalcode(search_text)" md-item-text="item">
+                                <md-autocomplete md-input-name="zipcode_input_name" md-input-id = "autocomplete_input" md-no-cache="true" md-selected-item="selected_item" 
+                                                 md-search-text-change="postal_input_change(search_text)"
+                                                 md-search-text="search_text" md-items="item in postalcode(search_text)" md-item-text="item" required ng-disabled="form_from == 'location'">
                                     <md-item-template>
                                         <span>{{item}}</span>
                                     </md-item-template>
+                                    <!-- <div ng-message-exp="{1 == 1}">This field is required</div> -->
+                                    <!-- <div ng-messages-exp="{search_keyword_form.zipcode_input_name.$touched}">
+                                        <div ng-message-exp="{true}">This field is required</div>
+                                      </div> -->
                                 </md-autocomplete>
+                                <div class="help-block" ng-show="(form_zipcode === undefined || form_zipcode === '') && search_keyword_form.zipcode_input_name.$touched">
+                                    Please enter a zipcode.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -501,14 +513,17 @@
                                     </tr>
                                     <tr>
                                         <td>Feedback Rating Star</td>
-                                        <td>
-                                            <i class="mdi mdi-star-border mdi-2x" style="color:{{item_detail_seller.rating}}"></i>
+                                        <td ng-if="item_detail_seller.feedback < 10000">
+                                            <i class="mdi mdi-stars mdi-2x" style="color:{{item_detail_seller.rating}}"></i>
+                                        </td>
+                                        <td ng-if="item_detail_seller.feedback >= 10000">
+                                            <i class="mdi mdi-star-border mdi-2x" style="color:{{item_detail_seller.rating.substring(item_detail_seller.rating.indexOf('Shooting'))}}"></i>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>Top Rated</td>
                                         <td>
-                                            <i class="mdi mdi-close mdi-2x" ng-show="(item_detail_seller.toprated === false)"></i>
+                                            <i class="mdi mdi-close mdi-2x" ng-show="(item_detail_seller.toprated === false || item_detail_seller.toprated === undefined)"></i>
                                             <i class="mdi mdi-check mdi-2x" ng-show="(item_detail_seller.toprated === true)"></i>
                                         </td>
                                     </tr>

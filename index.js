@@ -1,19 +1,19 @@
-var app = angular.module('app', ['ngAnimate', 'angular-svg-round-progressbar', 'ngMaterial', 'tooltips'])
+var app = angular.module('app', ['ngAnimate', 'angular-svg-round-progressbar', 'ngMaterial', 'tooltips','ngMessages'])
 
 app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
     $scope.init = function(){
         // console.log('in init')
-        $scope.form_keyword = 'pixel';
+        $scope.form_keyword = undefined;
         $scope.form_category = 'all';
         $scope.form_condition_new = false;
         $scope.form_condition_used = false;
         $scope.form_condition_unspecified = false;
         $scope.form_shipping_local = false;
         $scope.form_shipping_free = false;
-        $scope.form_distance = '1000';
+        $scope.form_distance = undefined;
         $scope.form_from = 'location';
         $scope.form_local_zipcode = '90007';
-        $scope.form_zipcode = '';
+        $scope.form_zipcode = undefined;
         $scope.get_local_ip();
     }
 
@@ -44,6 +44,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
     $scope.last_detail_item = "-1";
     $scope.set_selected = function(item_id){
         $scope.last_detail_item = item_id;
+
     }
 
     $scope.get_local_ip = function(){
@@ -297,6 +298,15 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
     }
 
     $scope.postalcodes = [];
+    $scope.postal_input_change = function(val){
+        form_zipcode = val;
+        if(val === '' || val === undefined){
+            $("input[name='zipcode_input_name']").addClass('form-control is-invalid')
+        }
+        else{
+            $("input[name='zipcode_input_name']").removeClass('form-control is-invalid')
+        }
+    }
     $scope.postalcode = function(val){
         // console.log(val);
         $scope.form_zipcode = val;

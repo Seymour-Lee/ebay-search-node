@@ -274,6 +274,7 @@ function ebay_search_item(req, res){
                 seller["popularity"] = item.Seller.PositiveFeedbackPercent;
                 // change rating to color
                 seller["rating"] = item.Seller.FeedbackRatingStar.toLowerCase();
+                console.log(item.Seller.FeedbackRatingStar,item.Seller.FeedbackScore)
                 seller["toprated"] = item.Seller.TopRatedSeller;
                 if(item.hasOwnProperty('Storefront.StoreName')) seller["store"] = item.Storefront.StoreName;
                 else seller["store"] = 'N/A';
