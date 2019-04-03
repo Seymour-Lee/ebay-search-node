@@ -22,6 +22,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
     };
 
     $scope.url = location.host;
+    // console.log('$scope.url is ', $scope.url)
     $scope.items_list = [];
     $scope.items_id2obj = {};
     $scope.curpage_list = [];
@@ -418,7 +419,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
     }
 
     $scope.row_clicked = function(){
-        console.log('row clicked')
+        console.log('row clicked', $scope.form_keyword)
     }
 
 });
