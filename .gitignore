@@ -3,3 +3,5 @@ images/
 *.json
 README.md
 setup.sh
+*.zip
+*.sh

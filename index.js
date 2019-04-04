@@ -112,6 +112,7 @@ app.controller('ctrlmaster', function($scope, $location, $http, $timeout) {
                 from: $scope.form_from,
                 zipcode: ($scope.form_from == 'location'? $scope.form_local_zipcode: $scope.form_zipcode)
             }
+            // http://csci571hw8liyiming.us-east-2.elasticbeanstalk.com/search_keyword?keyword=pixel&categpry=all&new=false&used=false&unspecified=false&local=false&free=false&distance=10&from=location&zipcode=90007
         }).then(function successCallback(response) {
             // this callback will be called asynchronously
             // when the response is available

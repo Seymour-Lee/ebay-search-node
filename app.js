@@ -113,6 +113,7 @@ function ebay_search_keyword(req, res){
         } 
     }
     url += '&outputSelector(0)=SellerInfo&outputSelector(1)=StoreInfo';
+    console.log(url)
 
     http.get(url, (resp) => {
         const { statusCode } = resp;
