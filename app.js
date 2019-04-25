@@ -1,6 +1,7 @@
 const express = require('express')
 const https = require('https')
 const http = require('http')
+const fs = require('fs');
 const app = express()
 const port = 8081
 
@@ -27,6 +28,12 @@ var category2id = {
 };
 
 var last_keyword_result = {};
+fs.readFile('history.json', 'utf8', function readFileCallback(err, data){
+    if (err){
+        console.log(err);
+    } else {
+    last_keyword_result = JSON.parse(data); //now it an object
+}});
 
 const ebay_keyword_url = 'http://svcs.ebay.com/services/search/FindingService/v1?'
 const ebay_item_url = 'http://open.api.ebay.com/shopping?'
@@ -88,10 +95,10 @@ function ebay_search_keyword(req, res){
     if(param.categpry != 'all'){
         url += '&categoryId=' + category2id[param.categpry];
     }
-    url += '&itemFilter(0).name=MaxDistance&itemFilter(0).value=' + param.distance;
-    url += '&itemFilter(1).name=FreeShipping Only&itemFilter(1).value=' + param.free;
-    url += '&itemFilter(2).name=LocalPickupOnly&itemFilter(2).value=' + param.local;
-    url += '&itemFilter(3).name=HideDuplicateItems&itemFilter(3).value=true';
+    url += '&itemFilter(0).name=FreeShipping Only&itemFilter(0).value=' + param.free;
+    url += '&itemFilter(1).name=LocalPickupOnly&itemFilter(1).value=' + param.local;
+    url += '&itemFilter(2).name=HideDuplicateItems&itemFilter(2).value=true';
+    url += '&itemFilter(3).name=MaxDistance&itemFilter(3).value=' + param.distance;
     var counter = 0;
     if(param.new == 'true') counter += 1;
     if(param.used == 'true') counter += 1;
@@ -113,7 +120,7 @@ function ebay_search_keyword(req, res){
         } 
     }
     url += '&outputSelector(0)=SellerInfo&outputSelector(1)=StoreInfo';
-    console.log(url)
+    // console.log(url)
 
     http.get(url, (resp) => {
         const { statusCode } = resp;
@@ -143,15 +150,17 @@ function ebay_search_keyword(req, res){
         resp.on('end', () => {
             try {
                 const parsedData = JSON.parse(rawData);
+                // console.log(parsedData.findItemsAdvancedResponse[0].errorMessage[0].error);
                 var items = parsedData.findItemsAdvancedResponse[0].searchResult[0].item;
                 if(items == undefined || items.length == 0){
                     res.send([]);
                     return;
                 }
                 // save a map for last searched items: id2obj
-                last_keyword_result = {};
+                // last_keyword_result = {};
                 var cols = [];
                 // handle no records
+                console.log(items[0].condition)
                 for(var i = 0; i < items.length; i++){
                     var col = {};
                     var item = items[i];
@@ -178,9 +187,17 @@ function ebay_search_keyword(req, res){
                     else col["zip"] = 'N/A';
                     if(item.hasOwnProperty('sellerInfo')) col["seller"] = item.sellerInfo[0].sellerUserName[0];
                     else col["seller"] = 'N/A';
+                    // console.log(item.condition[0], typeof(item.condition));
+                    if(item.hasOwnProperty('condition')) col["condition"] = item.condition[0].conditionDisplayName[0];
+                    else col["condition"] = 'N/A';
                     cols.push(col);
                 }
+                fs.writeFile('history.json', JSON.stringify(last_keyword_result), 'utf8', function(err) {
+                    if (err) throw err;
+                    //console.log('complete', last_keyword_result);
+                });
                 // console.log(items.slice(-1))
+                // console.log(items[0].condition)
                 // console.log(cols.slice(-1))
                 // console.log(parsedData);
                 res.send(cols)
@@ -241,41 +258,58 @@ function ebay_search_item(req, res){
                 const parsedData = JSON.parse(rawData);
                 // console.log(parsedData);
                 var item = parsedData.Item;
+                // console.log(item);
+                // console.log(item.ItemSpecifics.NameValueList);
                 var ans = {};
                 var product = {};
                 product["title"] = item.Title;
                 product["id"] = item.ItemID;
                 product["images"] = item.PictureURL;
-                console.log(product["images"])
-                product["subtitle"] = item.Subtitle;
+                // console.log(product["images"])
+                console.log(1 == 2? 1: 2);
+                product["subtitle"] = item.hasOwnProperty("Subtitle")? item.Subtitle: item.Title;
                 product["price"] = "$" + item.CurrentPrice.Value.toString();
                 product["location"] = item.Location;
                 product["returnpolicy"] = item.ReturnPolicy.ReturnsAccepted + " Within " + item.ReturnPolicy.ReturnsWithin;
+                product["returnaccepted"] = item.ReturnPolicy.ReturnsAccepted;
+                product["returnwithin"] = item.ReturnPolicy.ReturnsWithin;
                 product["specifics"] = item.ItemSpecifics.NameValueList;
                 product["natureserchurl"] = item.ViewItemURLForNaturalSearch;
+                product["golablshipping"] = item.GlobalShipping;
+                product["conditiondescription"] = item.ConditionDescription;
+                product["refund"] = item.ReturnPolicy.Refund;
+                product["shippedby"] = item.ReturnPolicy.ShippingCostPaidBy;
                 ans["product"] = product;
+                console.log("product part loaded into details json")
+                // console.log(product)
 
                 // // call google api
                 // var photos = [];
 
                 // last_keyword_result to get shipping info
                 var id = item.ItemID;
-                var shipping_info = last_keyword_result[id].shippingInfo[0]
+                // console.log("line 264", last_keyword_result[id])
                 var shipping = {};
-                shipping["cost"] = (shipping_info.shippingServiceCost[0].__value__ == '0.0'? 'Free Shipping': '$'+shipping_info.shippingServiceCost[0].__value__);
-                shipping["location"] = shipping_info.shipToLocations[0];
-                shipping["handle_time"] = shipping_info.handlingTime[0] + ' Day';
-                shipping["expedited"] = shipping_info.expeditedShipping[0];
-                shipping["oneday"] = shipping_info.oneDayShippingAvailable[0];
-                shipping["return"] = last_keyword_result[id].returnsAccepted[0];
+                if(last_keyword_result[id].hasOwnProperty("shippingInfo")){
+                    var shipping_info = last_keyword_result[id].shippingInfo[0]
+                    // console.log(last_keyword_result[id])
+                    shipping["cost"] = (shipping_info.shippingServiceCost[0].__value__ == '0.0'? 'Free Shipping': '$'+shipping_info.shippingServiceCost[0].__value__);
+                    shipping["location"] = shipping_info.shipToLocations[0];
+                    shipping["handle_time"] = shipping_info.handlingTime[0] + ' Day';
+                    shipping["expedited"] = shipping_info.expeditedShipping[0];
+                    shipping["oneday"] = shipping_info.oneDayShippingAvailable[0];
+                    shipping["return"] = last_keyword_result[id].returnsAccepted[0];
+                    shipping["condition_id"] = last_keyword_result[id].condition[0].conditionId[0];
+                }
                 ans["shipping"] = shipping;
+                console.log("shipping part loaded into details json")
 
                 var seller = {};
                 seller["feedback"] = item.Seller.FeedbackScore;
                 seller["popularity"] = item.Seller.PositiveFeedbackPercent;
                 // change rating to color
                 seller["rating"] = item.Seller.FeedbackRatingStar.toLowerCase();
-                console.log(item.Seller.FeedbackRatingStar,item.Seller.FeedbackScore)
+                // console.log(item.Seller.FeedbackRatingStar,item.Seller.FeedbackScore)
                 seller["toprated"] = item.Seller.TopRatedSeller;
                 if(item.hasOwnProperty('Storefront')) seller["title"] = item.Storefront.StoreName.replace(/ /g,'').toUpperCase();
                 else seller["title"] = 'N/A';
@@ -372,10 +406,12 @@ function ebay_search_similar(req, res){
 function google_search_photos(req, res){
     var param = req.query;
     var url = google_photos_url;
-    url += 'q=' + param.title;
+    url += 'q=' + encodeURIComponent(param.title);
     url += '&cx=' + google_engine;
     url += '&imgSize=huge&imgType=news&num=8&searchType=image';
     url += '&key=' + google_key;
+
+    // console.log(url);
 
     https.get(url, (resp) => {
         const { statusCode } = resp;
